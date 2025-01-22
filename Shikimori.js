@@ -1,6 +1,6 @@
 (function () {
     'use strict';
 
-    Lampa.Utils.putScriptAsync(['https://kartmansms.github.io/main/Shikimori/Shikimori.js'], function () { });
+    Lampa.Utils.putScriptAsync(['https://raw.githubusercontent.com/kartmansms/main/refs/heads/main/Shikimori/Shikimori.js'], function () { });
 
 })();
