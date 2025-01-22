@@ -767,7 +767,7 @@
         var month = now.getMonth();
         var year = now.getFullYear();
         var seasons = ['winter', 'spring', 'summer', 'fall'];
-        var seasonIndex = (month + 1) % 12 === 0 ? 0 : Math.floor((month + 1) / 3); // Визначення індексу сезону
+        var seasonIndex = (month + 1) % 12 === 0 ? 0 : Math.floor((month + 1) / 3); // Определение индекса сезона
         return "".concat(seasons[seasonIndex], "_").concat(month === 11 ? year + 1 : year);
       }
       function generateDynamicSeasons() {
@@ -780,19 +780,19 @@
           nextDate.setMonth(now.getMonth() + 3 * i);
           seasons.add(getCurrentSeason());
         }
-        return Array.from(seasons); // Перетворюємо Set назад в масив
+        return Array.from(seasons); // Преобразуем Set обратно в массив
       }
       function generateYearRanges() {
         var currentYear = new Date().getFullYear();
         var ranges = [];
 
-        // Генеруємо діапазони по 10 років
+        // Генерируем диапазоны по 10 лет
         for (var startYear = currentYear; startYear >= 2000; startYear -= 10) {
           var endYear = Math.max(startYear - 9, 2000);
           ranges.push("".concat(endYear, "_").concat(startYear));
         }
 
-        // Додаємо статичні діапазони для старіших років
+        // Добавляем статические диапазоны для старших лет
         ranges.push("199x", "198x", "ancient");
         return ranges;
       }
@@ -803,12 +803,12 @@
         return allSeasons.map(function (season) {
           return {
             "code": season,
-            "title": season.replace(/_/g, '-') // Замінюємо підкреслення на пробіли для читабельності
+            "title": season.replace(/_/g, '-') // Заменяем подчеркивание пробелами для читабельности
           };
         });
       }
 
-      // Приклад використання
+      // Пример использования
       //console.log(generateSeasonJSON());
       filters.seasons = {
         title: 'Season',
