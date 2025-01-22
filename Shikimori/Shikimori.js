@@ -774,7 +774,7 @@
         var now = new Date();
         var seasons = new Set([getCurrentSeason()]);
 
-        // Додаємо наступні три сезони
+        // Добавляем следующие три сезона
         for (var i = 1; i <= 3; i++) {
           var nextDate = new Date(now);
           nextDate.setMonth(now.getMonth() + 3 * i);
