@@ -705,7 +705,7 @@
       filters.status = {
         title: 'Статус',
         items: [{
-          title: "Запланировано",
+          title: "Анонс",
           code: "anons"
         }, {
           title: "Онгоиг",
@@ -718,14 +718,14 @@
       filters.sort = {
         title: 'Сортировка',
         items: [{
-          title: "По ID",
-          code: "id"
+          title: "По рейтингу",
+          code: "ranked"
         }, {
           title: "id_desc",
           code: "id_desc"
         }, {
-          title: "По рейтингу",
-          code: "ranked"
+          title: "По ID",
+          code: "id"
         }, {
           title: "По типу",
           code: "kind"
