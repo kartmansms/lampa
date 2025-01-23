@@ -777,7 +777,7 @@ function generateYearRanges() {
   // Генерируем диапазоны по 10 лет
   for (var startYear = currentYear; startYear >= 2000; startYear -= 10) {
     var endYear = Math.max(startYear - 9, 2000); // Вычисляем конечный год
-    ranges.push(`${endYear}_${startYear}`); // Добавляем диапазон в формате "начальный_год_конечный_год"
+    ranges.push(`${startYear}_${endYear}`); // Добавляем диапазон в формате "конечный_год_начальный_год"
   }
 
   // Добавляем статические диапазоны для старших годов
