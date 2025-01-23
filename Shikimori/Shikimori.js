@@ -130,7 +130,7 @@
     function makeInvokeMethod(e, r, n) {
       var o = h;
       return function (i, a) {
-        if (o === f) throw Error("Generator is already running");
+        if (o === f) throw Error("Генератор уже запущен");
         if (o === s) {
           if ("throw" === i) throw a;
           return {
@@ -167,11 +167,11 @@
     function maybeInvokeDelegate(e, r) {
       var n = r.method,
         o = e.iterator[n];
-      if (o === t) return r.delegate = null, "throw" === n && e.iterator.return && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y;
+      if (o === t) return r.delegate = null, "throw" === n && e.iterator.return && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("Итератор не предоставляет метод '" + n + "'")), y;
       var i = tryCatch(o, e.iterator, r.arg);
       if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y;
       var a = i.arg;
-      return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y);
+      return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("результат итератора не является объектом"), r.delegate = null, y);
     }
     function pushTryEntry(t) {
       var e = {
@@ -202,7 +202,7 @@
           return i.next = i;
         }
       }
-      throw new TypeError(typeof e + " is not iterable");
+      throw new TypeError(typeof e + " не является итерируемым");
     }
     return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", {
       value: GeneratorFunctionPrototype,
@@ -272,7 +272,7 @@
             } else if (c) {
               if (this.prev < i.catchLoc) return handle(i.catchLoc, !0);
             } else {
-              if (!u) throw Error("try statement without catch or finally");
+              if (!u) throw Error("Оператор try без catch или finally");
               if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
             }
           }
@@ -312,7 +312,7 @@
             return o;
           }
         }
-        throw Error("illegal catch attempt");
+        throw Error("незаконная попытка catch");
       },
       delegateYield: function (e, r, n) {
         return this.delegate = {
@@ -329,7 +329,7 @@
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
       if ("object" != typeof i) return i;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
+      throw new TypeError("@@toPrimitive должен возвращать примитивное значение.");
     }
     return ("string" === r ? String : Number)(t);
   }
@@ -404,7 +404,7 @@
     return arr2;
   }
   function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    throw new TypeError("Неверная попытка распространить неитерируемый экземпляр.\nДля того чтобы быть итерируемым, не-массивные объекты должны иметь метод [Symbol.iterator]().");
   }
 
   function main(params, oncomplite, onerror) {
@@ -439,7 +439,7 @@
           oncomplite(response.data.animes);
         },
         error: function error(_error) {
-          console.error('Error:', _error);
+          console.error('Ошибка:', _error);
           onerror(_error); // Вызов onerror при ошибке запроса
         }
       });
@@ -462,19 +462,19 @@
     // Первый GET запрос к https://animeapi.my.id/shikimori/{animeData.id}
     $.get("https://arm.haglund.dev/api/v2/ids?source=myanimelist&id=".concat(animeData.id), function (response) {
       if (response === null) {
-        console.log('We here step#1');
+        console.log('Мы здесь шаг#1');
         // Если получили 404, продолжаем искать на TMDB
         searchTmdb(animeData.name, function (tmdbResponse) {
           handleTmdbResponse(tmdbResponse, animeData.japanese);
         });
       } else if (response.themoviedb === null) {
-        console.log('We here step#2');
+        console.log('Мы здесь шаг#2');
         // Если themoviedb: null, делаем запрос к https://api.themoviedb.org/3/search/multi?include_adult=true&query={animeData.name}
         searchTmdb(animeData.name, function (tmdbResponse) {
           handleTmdbResponse(tmdbResponse, animeData.japanese);
         });
       } else {
-        console.log('We here step#3', animeData.kind);
+        console.log('Мы здесь шаг#3', animeData.kind);
         // Если themoviedb не равно null, делаем запрос к https://api.themoviedb.org/3/movie/{response.themoviedb}
         getTmdb(response.themoviedb, animeData.kind, processResults);
       }
@@ -485,7 +485,7 @@
           handleTmdbResponse(tmdbResponse, animeData.japanese);
         });
       } else {
-        console.error('Error fetching data from animeapi.my.id:', jqXHR.status);
+        console.error('Ошибка при получении данных с animeapi.my.id:', jqXHR.status);
       }
     });
     function searchTmdb(query, callback) {
@@ -539,7 +539,7 @@
             });
           });
           Lampa.Select.show({
-            title: 'Find',
+            title: 'Найти',
             items: menu,
             onBack: function onBack() {
               Lampa.Controller.toggle("content");
@@ -613,7 +613,7 @@
     });
     var items = [];
     var html = $("<div class='LMEShikimori-module'></div>");
-    var head = $("<div class='LMEShikimori-head torrent-filter'><div class='LMEShikimori__home simple-button simple-button--filter selector'>Home</div><div class='LMEShikimori__search simple-button simple-button--filter selector'>Filter</div></div>");
+    var head = $("<div class='LMEShikimori-head torrent-filter'><div class='LMEShikimori__home simple-button simple-button--filter selector'>Домой</div><div class='LMEShikimori__search simple-button simple-button--filter selector'>Фильтр</div></div>");
     var body = $('<div class="LMEShikimori-catalog--list category-full"></div>');
     var active, last;
 
@@ -667,17 +667,17 @@
           });
         });
         filters.kind = {
-          title: 'Genre',
+          title: 'Жанр',
           items: modifiedResponse
         };
       });
       filters.AnimeKindEnum = {
-        title: 'Type',
+        title: 'Тип',
         items: [{
-          title: "TV Series",
+          title: "TV Сериал",
           code: "tv"
         }, {
-          title: "Movie",
+          title: "Фильм",
           code: "movie"
         }, {
           title: "OVA",
@@ -686,13 +686,13 @@
           title: "ONA",
           code: "ona"
         }, {
-          title: "Special",
+          title: "Спешл",
           code: "special"
         }, {
-          title: "TV Special",
+          title: "TV Спешл",
           code: "tv_special"
         }, {
-          title: "Music",
+          title: "Музыка",
           code: "music"
         }, {
           title: "PV",
@@ -703,55 +703,55 @@
         }]
       };
       filters.status = {
-        title: 'Status',
+        title: 'Статус',
         items: [{
-          title: "Planned",
+          title: "Запланировано",
           code: "anons"
         }, {
-          title: "Airing",
+          title: "В эфире",
           code: "ongoing"
         }, {
-          title: "Released",
+          title: "Вышло",
           code: "released"
         }]
       };
       filters.sort = {
-        title: 'Sort',
+        title: 'Сортировка',
         items: [{
-          title: "By ID",
+          title: "По ID",
           code: "id"
         }, {
           title: "id_desc",
           code: "id_desc"
         }, {
-          title: "By rank",
+          title: "По рейтингу",
           code: "ranked"
         }, {
-          title: "By type",
+          title: "По типу",
           code: "kind"
         }, {
-          title: "By popularity",
+          title: "По популярности",
           code: "popularity"
         }, {
-          title: "In alphabetical order",
+          title: "В алфавитном порядке",
           code: "name"
         }, {
-          title: "By release date",
+          title: "По дате выхода",
           code: "aired_on"
         }, {
-          title: "By number of episodes",
+          title: "По количеству эпизодов",
           code: "episodes"
         }, {
-          title: "By status",
+          title: "По статусу",
           code: "status"
         }, {
-          title: "By random",
+          title: "Случайно",
           code: "random"
         }, {
-          title: "By random",
+          title: "Случайно",
           code: "ranked_random"
         }, {
-          title: "By Shikimori ranking",
+          title: "По рейтингу Shikimori",
           code: "ranked_shiki"
         }, {
           title: "created_at",
@@ -792,8 +792,8 @@
           ranges.push("".concat(endYear, "_").concat(startYear));
         }
 
-        // Добавляем статические диапазоны для старших лет
-        ranges.push("199x", "198x", "ancient");
+        // Добавляем статические диапазоны для старших годов
+        // ranges.push("199x", "198x", "ancient");
         return ranges;
       }
       function generateSeasonJSON() {
@@ -803,7 +803,7 @@
         return allSeasons.map(function (season) {
           return {
             "code": season,
-            "title": season.replace(/_/g, '-') // Заменяем подчеркивание пробелами для читабельности
+            "title": season.replace(/_/g, '-') // Заменяем подчеркивания на пробелы для читабельности
           };
         });
       }
@@ -811,7 +811,7 @@
       // Пример использования
       //console.log(generateSeasonJSON());
       filters.seasons = {
-        title: 'Season',
+        title: 'Сезон',
         items: generateSeasonJSON()
       };
       var serverElement = head.find('.LMEShikimori__search');
@@ -861,7 +861,7 @@
       function mainMenu() {
         for (var i in filters) selected(filters[i]);
         Lampa.Select.show({
-          title: 'Filters',
+          title: 'Фильтры',
           items: [{
             title: Lampa.Lang.translate('search_start'),
             searchShikimori: true
@@ -880,7 +880,7 @@
         var query = queryForShikimori();
         var params = {
           url: '',
-          title: 'Shikimori',
+          title: 'Shikimoritest',
           component: 'LMEShikimori',
           page: 1
         };
@@ -910,7 +910,7 @@
       homeElement.on('hover:enter', function () {
         Lampa.Activity.push({
           url: '',
-          title: 'Shikimori',
+          title: 'Shikimoritest',
           component: 'LMEShikimori',
           page: 1
         });
@@ -1009,7 +1009,7 @@
                 _context.next = 8;
                 break;
               }
-              console.warn("No data found for the provided ID.");
+              console.warn("Данные для предоставленного ID не найдены.");
               return _context.abrupt("return");
             case 8:
               _context.next = 10;
@@ -1020,8 +1020,8 @@
               });
             case 10:
               response = _context.sent;
-              dubbers = "\n                    <div class=\"full-descr__info\">\n                        <div class=\"full-descr__info-name\">Fan Dubbers</div>\n                        <div class=\"full-descr__text\">".concat(response.fandubbers.join(', '), "</div>\n                    </div>");
-              subbers = "\n                    <div class=\"full-descr__info\">\n                        <div class=\"full-descr__info-name\">Fan Subbers</div>\n                        <div class=\"full-descr__text\">".concat(response.fansubbers.join(', '), "</div>\n                    </div>");
+              dubbers = "\n                    <div class=\"full-descr__info\">\n                        <div class=\"full-descr__info-name\">Фандабберы</div>\n                        <div class=\"full-descr__text\">".concat(response.fandubbers.join(', '), "</div>\n                    </div>");
+              subbers = "\n                    <div class=\"full-descr__info\">\n                        <div class=\"full-descr__info-name\">Фансабберы</div>\n                        <div class=\"full-descr__text\">".concat(response.fansubbers.join(', '), "</div>\n                    </div>");
               e.object.activity.render().find(".full-descr__right").append(dubbers, subbers);
               shikimoriRates = "<div class=\"full-start__rate rate--shikimori\"><div>".concat(response.score, "</div><div>Shikimori</div></div>");
               e.object.activity.render().find(".full-start-new__rate-line").prepend(shikimoriRates);
@@ -1030,7 +1030,7 @@
             case 18:
               _context.prev = 18;
               _context.t0 = _context["catch"](1);
-              console.error("Error fetching data:", _context.t0);
+              console.error("Ошибка при получении данных:", _context.t0);
             case 21:
             case "end":
               return _context.stop();
@@ -1061,7 +1061,7 @@
       type: "other",
       version: "0.1",
       name: "LME Shikimori",
-      description: "Add Shikimori catalogue",
+      description: "Добавляет каталог Shikimori",
       component: "LMEShikimori"
     };
     Lampa.Manifest.plugins = manifest;
