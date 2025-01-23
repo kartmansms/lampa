@@ -739,12 +739,6 @@
           title: "По статусу",
           code: "status"
         }, {
-          title: "Случайно",
-          code: "random"
-        }, {
-          title: "Случайно",
-          code: "ranked_random"
-        }, {
           title: "По рейтингу Shikimori",
           code: "ranked_shiki"
         }]
