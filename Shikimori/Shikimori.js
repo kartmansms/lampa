@@ -781,7 +781,7 @@ function generateYearRanges() {
   }
 
   // Добавляем статические диапазоны для старших годов
-  ranges.push("199x", "198x", "ancient"); // Пример статических диапазонов
+  //ranges.push("199x", "198x", "ancient"); // Пример статических диапазонов
   return ranges;
 }
 
