@@ -721,12 +721,6 @@
           title: "По рейтингу",
           code: "ranked"
         }, {
-          title: "id_desc",
-          code: "id_desc"
-        }, {
-          title: "По ID",
-          code: "id"
-        }, {
           title: "По типу",
           code: "kind"
         }, {
@@ -753,12 +747,6 @@
         }, {
           title: "По рейтингу Shikimori",
           code: "ranked_shiki"
-        }, {
-          title: "created_at",
-          code: "created_at"
-        }, {
-          title: "created_at_desc",
-          code: "created_at_desc"
         }]
       };
       /** Season Range **/
