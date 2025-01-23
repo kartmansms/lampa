@@ -1,4 +1,4 @@
 # Lampa Kartman Edition
 
 
-[LKE Shikimori](https://lampame.github.io/main/torrentmanager.js)
+[LKE Shikimori](https://kartmansms.github.io/main/Shikimori.js)
