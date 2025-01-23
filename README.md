@@ -5,4 +5,4 @@
 
 
 
-Ссылка на подключение https://kartmansms.github.io/main/Shikimori.js
+Ссылка на подключение плагина в Lampa https://kartmansms.github.io/main/Shikimori.js
