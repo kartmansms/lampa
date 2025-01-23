@@ -760,7 +760,7 @@ function generateDynamicSeasons() {
   var seasons = new Set([getCurrentSeason(now)]); // Добавляем текущий сезон
 
   // Добавляем следующие три сезонов
-  for (var i = 1; i <= 3; i++) {
+  for (var i = 1; i <= 6; i++) {
     var nextDate = new Date(now);
     nextDate.setMonth(now.getMonth() + 3 * i); // Увеличиваем месяц на 3 для каждого следующего сезона
     seasons.add(getCurrentSeason(nextDate)); // Добавляем сезон для новой даты
