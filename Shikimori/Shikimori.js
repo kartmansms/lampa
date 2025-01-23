@@ -708,7 +708,7 @@
           title: "Запланировано",
           code: "anons"
         }, {
-          title: "В эфире",
+          title: "Онгоиг",
           code: "ongoing"
         }, {
           title: "Вышло",
