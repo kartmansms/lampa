@@ -780,6 +780,11 @@ function generateYearRanges() {
     ranges.push("".concat(endYear, "_").concat(startYear)); // Добавляем диапазон в формате "начальный_год_конечный_год"
   }
 
+  // Добавляем статические диапазоны для старших годов
+  ranges.push("199x", "198x", "ancient"); // Пример статических диапазонов
+  return ranges;
+}
+
 // Функция для объединения сезонов и диапазонов годов в JSON-подобный массив
 function generateSeasonJSON() {
   var dynamicSeasons = generateDynamicSeasons(); // Генерируем динамические сезоны
