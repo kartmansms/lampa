@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-
+\\\\
   function ownKeys(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
