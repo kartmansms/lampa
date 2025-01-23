@@ -749,7 +749,7 @@
 function getCurrentSeason(date = new Date()) {
   var month = date.getMonth(); // Получаем текущий месяц (0-11)
   var year = date.getFullYear(); // Получаем текущий год
-  var seasons = ['зима', 'весна', 'лето', 'осень']; // Список сезонов на русском
+  var seasons = ['winter', 'spring', 'summer', 'fall']; // Список сезонов на русском
   var seasonIndex = Math.floor((month + 1) / 3) % 4; // Определение индекса сезона (0-3)
   return `${seasons[seasonIndex]}_${month === 11 ? year + 1 : year}`; // Возвращаем сезон и год
 }
