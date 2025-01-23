@@ -782,7 +782,7 @@
         }
         return Array.from(seasons); // Преобразуем Set обратно в массив
       }
-      //function generateYearRanges() {
+      function generateYearRanges() {
         var currentYear = new Date().getFullYear();
         var ranges = [];
 
