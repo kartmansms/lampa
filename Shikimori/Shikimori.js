@@ -580,7 +580,7 @@
       if (!string) return string; // Проверка на пустую строку или null/undefined
       return string.charAt(0).toUpperCase() + string.slice(1);
     }
-    var item = Lampa.Template.get("LMEShikimori-Card", {
+    var item = Lampa.Template.get("LKEShikimori-Card", {
       img: data.poster.originalUrl,
       type: data.kind.toUpperCase(),
       status: capitalizeFirstLetter(data.status),
@@ -592,7 +592,7 @@
     });
     /**
     if (!formattedSeason) {
-        $(item).find('.LMEShikimori.card__season').addClass('no-season');
+        $(item).find('.LKEShikimori.card__season').addClass('no-season');
     }
     **/
     this.render = function () {
@@ -612,9 +612,9 @@
       step: 250
     });
     var items = [];
-    var html = $("<div class='LMEShikimori-module'></div>");
-    var head = $("<div class='LMEShikimori-head torrent-filter'><div class='LMEShikimori__home simple-button simple-button--filter selector'>Домой</div><div class='LMEShikimori__search simple-button simple-button--filter selector'>Фильтр</div></div>");
-    var body = $('<div class="LMEShikimori-catalog--list category-full"></div>');
+    var html = $("<div class='LKEShikimori-module'></div>");
+    var head = $("<div class='LKEShikimori-head torrent-filter'><div class='LKEShikimori__home simple-button simple-button--filter selector'>Домой</div><div class='LKEShikimori__search simple-button simple-button--filter selector'>Фильтр</div></div>");
+    var body = $('<div class="LKEShikimori-catalog--list category-full"></div>');
     var active, last;
 
     //Start
@@ -800,7 +800,7 @@ console.log(generateSeasonJSON());
         title: 'Сезон',
         items: generateSeasonJSON()
       };
-      var serverElement = head.find('.LMEShikimori__search');
+      var serverElement = head.find('.LKEShikimori__search');
       function queryForShikimori() {
         var query = {};
         filters.AnimeKindEnum.items.forEach(function (a) {
@@ -867,7 +867,7 @@ console.log(generateSeasonJSON());
         var params = {
           url: '',
           title: 'Shikimori',
-          component: 'LMEShikimori',
+          component: 'LKEShikimori',
           page: 1
         };
 
@@ -892,12 +892,12 @@ console.log(generateSeasonJSON());
       serverElement.on('hover:enter', function () {
         mainMenu();
       });
-      var homeElement = head.find('.LMEShikimori__home');
+      var homeElement = head.find('.LKEShikimori__home');
       homeElement.on('hover:enter', function () {
         Lampa.Activity.push({
           url: '',
           title: 'Shikimori',
-          component: 'LMEShikimori',
+          component: 'LKEShikimori',
           page: 1
         });
       });
@@ -1035,7 +1035,7 @@ console.log(generateSeasonJSON());
       Lampa.Activity.push({
         url: '',
         title: 'Shikimori',
-        component: 'LMEShikimori',
+        component: 'LKEShikimori',
         page: 1
       });
     });
@@ -1046,19 +1046,19 @@ console.log(generateSeasonJSON());
     var manifest = {
       type: "other",
       version: "0.1",
-      name: "LME Shikimori",
+      name: "LKE Shikimori",
       description: "Добавляет каталог Shikimori",
-      component: "LMEShikimori"
+      component: "LKEShikimori"
     };
     Lampa.Manifest.plugins = manifest;
     //Set Style and Template
-    Lampa.Template.add('LMEShikimoriStyle', "<style>\n            .LMEShikimori-catalog--list.category-full{-webkit-box-pack:justify !important;-webkit-justify-content:space-between !important;-ms-flex-pack:justify !important;justify-content:space-between !important}.LMEShikimori-head.torrent-filter{margin-left:1.5em}.LMEShikimori.card__type{background:#ff4242;color:#fff}.LMEShikimori .card__season{position:absolute;left:-0.8em;top:3.4em;padding:.4em .4em;background:#05f;color:#fff;font-size:.8em;-webkit-border-radius:.3em;border-radius:.3em}.LMEShikimori .card__status{position:absolute;left:-0.8em;bottom:1em;padding:.4em .4em;background:#ffe216;color:#000;font-size:.8em;-webkit-border-radius:.3em;border-radius:.3em}.LMEShikimori.card__season.no-season{display:none}\n        </style>");
-    Lampa.Template.add("LMEShikimori-Card", "<div class=\"LMEShikimori card selector layer--visible layer--render\">\n                <div class=\"LMEShikimori card__view\">\n                    <img src=\"{img}\" class=\"LMEShikimori card__img\" />\n                    <div class=\"LMEShikimori card__type\">{type}</div>\n                    <div class=\"LMEShikimori card__vote\">{rate}</div>\n                    <div class=\"LMEShikimori card__season\">{season}</div>\n                    <div class=\"LMEShikimori card__status\">{status}</div>\n                </div>\n                <div class=\"LMEShikimori card__title\">{title}</div>\n            </div>");
+    Lampa.Template.add('LKEShikimoriStyle', "<style>\n            .LKEShikimori-catalog--list.category-full{-webkit-box-pack:justify !important;-webkit-justify-content:space-between !important;-ms-flex-pack:justify !important;justify-content:space-between !important}.LKEShikimori-head.torrent-filter{margin-left:1.5em}.LKEShikimori.card__type{background:#ff4242;color:#fff}.LKEShikimori .card__season{position:absolute;left:-0.8em;top:3.4em;padding:.4em .4em;background:#05f;color:#fff;font-size:.8em;-webkit-border-radius:.3em;border-radius:.3em}.LKEShikimori .card__status{position:absolute;left:-0.8em;bottom:1em;padding:.4em .4em;background:#ffe216;color:#000;font-size:.8em;-webkit-border-radius:.3em;border-radius:.3em}.LKEShikimori.card__season.no-season{display:none}\n        </style>");
+    Lampa.Template.add("LKEShikimori-Card", "<div class=\"LKEShikimori card selector layer--visible layer--render\">\n                <div class=\"LKEShikimori card__view\">\n                    <img src=\"{img}\" class=\"LKEShikimori card__img\" />\n                    <div class=\"LKEShikimori card__type\">{type}</div>\n                    <div class=\"LKEShikimori card__vote\">{rate}</div>\n                    <div class=\"LKEShikimori card__season\">{season}</div>\n                    <div class=\"LKEShikimori card__status\">{status}</div>\n                </div>\n                <div class=\"LKEShikimori card__title\">{title}</div>\n            </div>");
     Lampa.Component.add(manifest.component, Component$1);
     //Set Franchise for FullCard
     Component();
     //Set menu
-    $('body').append(Lampa.Template.get('LMEShikimoriStyle', {}, true));
+    $('body').append(Lampa.Template.get('LKEShikimoriStyle', {}, true));
     if (window.appready) add();else {
       Lampa.Listener.follow("app", function (e) {
         if (e.type === "ready") add();
