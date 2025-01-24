@@ -10,7 +10,6 @@
 
 Прямая ссылка на подключение плагина в Lampa
 
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -19,31 +18,21 @@
     <title>Копирование ссылки</title>
 </head>
 <body>
-    <p>Ссылка: <a id="link" href="https://example.com">https://example.com</a></p>
+    <p>Ссылка: <span id="link">https://kartmansms.github.io/lampa/Shikimori.js</span></p>
     <button id="copyButton">Скопировать ссылку</button>
 
     <script>
         document.getElementById('copyButton').addEventListener('click', function() {
             // Получаем ссылку
-            const link = document.getElementById('link').href;
+            const link = document.getElementById('link').textContent;
 
-            // Создаем временный элемент textarea для копирования
-            const tempTextArea = document.createElement('textarea');
-            tempTextArea.value = link;
-            document.body.appendChild(tempTextArea);
-
-            // Выделяем текст в textarea
-            tempTextArea.select();
-            tempTextArea.setSelectionRange(0, 99999); // Для мобильных устройств
-
-            // Копируем текст в буфер обмена
-            document.execCommand('copy');
-
-            // Удаляем временный элемент textarea
-            document.body.removeChild(tempTextArea);
-
-            // Опционально: уведомление пользователя
-            alert('Ссылка скопирована: ' + link);
+            // Используем современный Clipboard API для копирования
+            navigator.clipboard.writeText(link).then(function() {
+                alert('Ссылка скопирована: ' + link);
+            }).catch(function(error) {
+                console.error('Ошибка при копировании: ', error);
+                alert('Не удалось скопировать ссылку.');
+            });
         });
     </script>
 </body>
