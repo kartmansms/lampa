@@ -11,3 +11,6 @@
 Прямая ссылка на подключение плагина в Lampa
 
 <button onclick="(https://kartmansms.github.io/lampa/Shikimori.js)">Click me</button>
+
+
+<button onclick="CopyLink()">Click me</button>
