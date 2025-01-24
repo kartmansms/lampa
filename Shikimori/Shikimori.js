@@ -752,7 +752,7 @@ function getCurrentSeason(date) {
   var seasonIndex = Math.floor((month + 1) / 3) % 4; // Определение индекса сезона
   return {
     code: `${seasons[seasonIndex]}_${year}`,
-    title: `${seasonTitles[seasonIndex]}-${year}`
+    title: `${seasonTitles[seasonIndex]} ${year}` // Убрал дефис, добавил пробел
   };
 }
 
@@ -760,8 +760,8 @@ function generateDynamicSeasons() {
   var now = new Date();
   var seasons = [];
 
-  // Добавляем текущий и предыдущие три сезона
-  for (var i = 0; i >= -3; i--) {
+  // Добавляем будущие, текущий и предыдущие сезоны
+  for (var i = 2; i >= -3; i--) { // Добавлен ещё один шаг для winter_2025
     var nextDate = new Date(now);
     nextDate.setMonth(now.getMonth() + 3 * i); // Добавляем 3 месяца для следующего сезона
     seasons.push(getCurrentSeason(nextDate));
@@ -773,11 +773,11 @@ function generateYearRanges() {
   var currentYear = new Date().getFullYear();
   var ranges = [];
 
-  // Генерируем текущий и предыдущие два года
-  for (var year = currentYear; year >= currentYear - 2; year--) {
+  // Генерируем текущий и предыдущие три года
+  for (var year = currentYear; year >= currentYear - 3; year--) {
     ranges.push({
       code: `${year}`,
-      title: `${year}`
+      title: `${year} год` // Добавил "год" к названию
     });
   }
 
@@ -790,6 +790,9 @@ function generateSeasonJSON() {
   var allSeasons = [...dynamicSeasons, ...yearRanges]; // Объединяем сезоны и годы
   return allSeasons;
 }
+
+// Пример использования
+console.log(generateSeasonJSON());
 
 // Пример использования
 console.log(generateSeasonJSON());
