@@ -721,18 +721,18 @@
           title: "По рейтингу",
           code: "ranked"
         }, {
-          title: "По типу",
-          code: "kind"
-        }, {
           title: "По популярности",
           code: "popularity"
         }, {
-          title: "В алфавитном порядке",
+          title: "По алфавиту",
           code: "name"
         }, {
           title: "По дате выхода",
           code: "aired_on"
         }, {
+          title: "По типу",
+          code: "kind"
+        }  {
           title: "По количеству эпизодов",
           code: "episodes"
         }, {
