@@ -744,66 +744,55 @@
         }]
       };
       /** Season Range **/
-
-// Функция для определения текущего сезона и года
-function getCurrentSeason(date = new Date()) {
-  var month = date.getMonth(); // Получаем текущий месяц (0-11)
-  var year = date.getFullYear(); // Получаем текущий год
-  var seasons = ['зима', 'весна', 'лето', 'осень']; // Список сезонов на русском
-  var seasonIndex = Math.floor((month + 1) / 3) % 4; // Определение индекса сезона (0-3)
-  return `${seasons[seasonIndex]}_${month === 11 ? year + 1 : year}`; // Возвращаем сезон и год
+function getCurrentSeason(date) {
+  var month = date.getMonth();
+  var year = date.getFullYear();
+  var seasons = ['winter', 'spring', 'summer', 'fall'];
+  var seasonTitles = ['Зима', 'Весна', 'Лето', 'Осень']; // Названия сезонов на русском
+  var seasonIndex = Math.floor((month + 1) / 3) % 4; // Определение индекса сезона
+  return {
+    code: `${seasons[seasonIndex]}_${year}`,
+    title: `${seasonTitles[seasonIndex]}-${year}`
+  };
 }
 
-// Функция для генерации текущего и предыдущих 3 сезонов
 function generateDynamicSeasons() {
-  var now = new Date(); // Текущая дата
-  var seasons = new Set([getCurrentSeason(now)]); // Добавляем текущий сезон
+  var now = new Date();
+  var seasons = [];
 
-  // Добавляем предыдущие три сезона
-  for (var i = 1; i <= 3; i++) {
+  // Добавляем текущий и предыдущие три сезона
+  for (var i = 0; i >= -3; i--) {
     var nextDate = new Date(now);
-    nextDate.setMonth(now.getMonth() - 3 * i); // Уменьшаем месяц на 3 для каждого следующего сезона
-    seasons.add(getCurrentSeason(nextDate)); // Добавляем сезон для новой даты
+    nextDate.setMonth(now.getMonth() + 3 * i); // Добавляем 3 месяца для следующего сезона
+    seasons.push(getCurrentSeason(nextDate));
   }
-
-  return Array.from(seasons); // Преобразуем Set обратно в массив
+  return seasons;
 }
 
-// Функция для генерации диапазонов годов
 function generateYearRanges() {
-  var currentYear = new Date().getFullYear(); // Текущий год
+  var currentYear = new Date().getFullYear();
   var ranges = [];
 
-  // Генерируем диапазоны по 10 лет
-  for (var startYear = currentYear; startYear >= 2000; startYear -= 10) {
-    var endYear = Math.max(startYear - 9, 2000); // Вычисляем конечный год
-    ranges.push(`${startYear}_${endYear}`); // Добавляем диапазон в формате "конечный_год_начальный_год"
+  // Генерируем текущий и предыдущие два года
+  for (var year = currentYear; year >= currentYear - 2; year--) {
+    ranges.push({
+      code: `${year}`,
+      title: `${year}`
+    });
   }
 
-  // Добавляем статические диапазоны для старших годов
-  //ranges.push("199x", "198x", "ancient"); // Пример статических диапазонов
   return ranges;
 }
 
-// Вспомогательная функция для объединения массивов
-function _toConsumableArray(arr) {
-  return Array.from(arr);
-}
-
-// Функция для объединения сезонов и диапазонов годов в JSON-подобный массив
 function generateSeasonJSON() {
-  var dynamicSeasons = generateDynamicSeasons(); // Генерируем динамические сезоны
-  var yearRanges = generateYearRanges(); // Генерируем диапазоны годов
-  var allSeasons = _toConsumableArray(new Set([].concat(_toConsumableArray(dynamicSeasons), _toConsumableArray(yearRanges)))); // Объединяем и удаляем дубликаты
-
-  // Преобразуем массив строк в массив объектов
-  return allSeasons.map(function (season) {
-    return {
-      "code": season, // Оригинальное значение
-      "title": season.replace(/_/g, '-') // Заменяем подчеркивания на дефисы для читабельности
-    };
-  });
+  var dynamicSeasons = generateDynamicSeasons();
+  var yearRanges = generateYearRanges();
+  var allSeasons = [...dynamicSeasons, ...yearRanges]; // Объединяем сезоны и годы
+  return allSeasons;
 }
+
+// Пример использования
+console.log(generateSeasonJSON());
 
       // Пример использования
       //console.log(generateSeasonJSON());
