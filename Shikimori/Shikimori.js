@@ -760,11 +760,15 @@ function generateDynamicSeasons() {
   var now = new Date();
   var seasons = [];
 
-  // Добавляем будущие, текущий и предыдущие сезоны
-  for (var i = 2; i >= -3; i--) { // Добавлен ещё один шаг для winter_2025
+  // Добавляем winter_2025, текущий и предыдущие сезоны
+  for (var i = 2; i >= -3; i--) { // Начинаем с i = 2, чтобы добавить winter_2025
     var nextDate = new Date(now);
     nextDate.setMonth(now.getMonth() + 3 * i); // Добавляем 3 месяца для следующего сезона
-    seasons.push(getCurrentSeason(nextDate));
+    var season = getCurrentSeason(nextDate);
+    // Исключаем spring_2025
+    if (season.code !== "spring_2025") {
+      seasons.push(season);
+    }
   }
   return seasons;
 }
