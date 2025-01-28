@@ -1,5 +1,5 @@
 # Lampa Kartman Edition (LKE)
 
 ```bibtex
-https://kartmansms.github.io/testing/Shikimori/Shikimori.js
+https://kartmansms.github.io/lampa/Shikimori/Shikimori.js
 ```
