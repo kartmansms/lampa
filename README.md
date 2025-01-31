@@ -1,3 +1,15 @@
+<div align="center">
+
+  <a href="https://www.deepseek.com/" target="_blank">
+    <img alt="Homepage" src="images/k.svg" />
+  </a>
+  </a>
+  <a href="https://huggingface.co/deepseek-ai" target="_blank">
+    <img alt="Hugging Face" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-DeepSeek%20AI-ffc107?color=ffc107&logoColor=white" />
+  </a>
+
+</div>
+
 # Lampa Kartman Edition (LKE)
 
 
