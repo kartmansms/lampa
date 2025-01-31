@@ -5,8 +5,9 @@
 ```bibtex
 https://kartmansms.github.io/lampa/Shikimori/Shikimori.js
 ```
-За основу взят код  [LME Shikimori](https://lampame.github.io/main/shikimori.js) `https://lampame.github.io/main/shikimori.js`
-Переработал код https://t.me/kartman_sms
+            За основу взят код  [LME Shikimori](https://lampame.github.io/main/shikimori.js) `https://lampame.github.io/main/shikimori.js`
+
+            Переработал код https://t.me/kartman_sms
 
 
 
