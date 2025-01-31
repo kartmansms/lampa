@@ -4,9 +4,9 @@
 </div>
 
 **Ссылка  на установку плагина**
-``bibtex
+```bibtex
  https://kartmansms.github.io/lampa/Shikimori/Shikimori.js
-``
+```
 
 
 
