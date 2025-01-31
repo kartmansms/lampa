@@ -1,5 +1,5 @@
 <div align="center">
-<h1>🚀 Janus-Series: Unified Multimodal Understanding and Generation Models</h1>
+<h1>🚀 Lampa Kartman Edition (LKE)</h1>
 
 </div>
 
