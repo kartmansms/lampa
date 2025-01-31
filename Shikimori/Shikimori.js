@@ -409,11 +409,8 @@
 
   function main(params, oncomplite, onerror) {
     $(document).ready(function () {
-      // Начинаем формировать запрос с базовыми параметрами
-      var query = "\n            query Animes {\n                animes(limit: 36, order: ".concat(params.sort || 'aired_on', ", page: ").concat(params.page, "\n        ");
       var query = "\n	query Animes {\n	animes(limit: 36, order: ".concat(params.sort || 'aired_on', ", page: ").concat(params.page, "\n	");
 
-      // Добавляем фильтры, если они присутствуют в params
       if (params.kind) {
         query += ", kind: \"".concat(params.kind, "\"");
       }
@@ -427,7 +424,6 @@
         query += ", season: \"".concat(params.seasons, "\"");
       }
 
-      // Закрываем параметры и продолжаем запрос
       query += ") {\n                    id\n                    name\n                    russian\n                    licenseNameRu\n                    english\n                    japanese\n                    kind\n                    score\n                    status\n                    season\n                    airedOn { year }\n                    poster {\n                        originalUrl\n                    }\n                }\n            }\n        ";
       $.ajax({
         url: 'https://shikimori.one/api/graphql',
@@ -441,18 +437,15 @@
         },
         error: function error(_error) {
           console.error('Ошибка:', _error);
+          onerror(_error);
         }
       });
     });
   }
   function search(animeData) {
-    //Cleaner
     function cleanName(name) {
-      // Регулярное выражение для удаления фраз "Season", "Part" и цифр рядом с ними
       var regex = /\b(Season|Part)\s*\d*\.?\d*\b/gi;
-      // Удаляем нежелательные фразы
       var cleanedName = name.replace(regex, '').trim();
-      // Удаляем лишние пробелы
       cleanedName = cleanedName.replace(/\s{2,}/g, ' ');
       return cleanedName;
     }
