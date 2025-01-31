@@ -4,8 +4,8 @@
 </div>
 
 **Ссылка  на установку плагина**
-```bibtex
-**Ссылка  на установку плагина** https://kartmansms.github.io/lampa/Shikimori/Shikimori.js
+**Ссылка  на установку плагина**```bibtex
+ https://kartmansms.github.io/lampa/Shikimori/Shikimori.js
 ```
 **За основу взят код:**  [LME Shikimori](https://lampame.github.io/main/Shikimori/Shikimori.js) `https://lampame.github.io/main/Shikimori/Shikimori.js`
 
