@@ -1,17 +1,6 @@
 <div align="center">
 <h1>🚀 Lampa Kartman Edition (LKE)</h1>
-
 </div>
-
-<div align="center">
-
-  <a href="https://www.deepseek.com/" target="_blank">
-    <img alt="text1" src="images/k.svg" />
-  </a>
-
-</div>
-
-# Lampa Kartman Edition (LKE)
 
 
 **Ссылка  на установку плагина**
