@@ -1,5 +1,7 @@
 # Lampa Kartman Edition (LKE)
 
+
+**Ссылка  на установку плагина**
 ```bibtex
 https://kartmansms.github.io/lampa/Shikimori/Shikimori.js
 ```
