@@ -1,4 +1,9 @@
 <div align="center">
+<h1>🚀 Janus-Series: Unified Multimodal Understanding and Generation Models</h1>
+
+</div>
+
+<div align="center">
 
   <a href="https://www.deepseek.com/" target="_blank">
     <img alt="text1" src="images/k.svg" />
