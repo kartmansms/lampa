@@ -1,6 +1,6 @@
 
 <div align="center">
- 🚀 Lampa Kartman Edition (LKE)
+<h1> 🚀 Lampa Kartman Edition (LKE)</h1>
 </div>
 
 **Ссылка  на установку плагина**
