@@ -1,5 +1,5 @@
 
-<div align="left">
+<div align="centr">
  🚀 Lampa Kartman Edition (LKE)
 </div>
 
