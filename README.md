@@ -1,4 +1,11 @@
 <div align="center">
+  <img src="images/k.svg" width="60%" alt="test" />
+</div>
+<hr>
+
+
+
+<div align="center">
 <h1>🚀 Lampa Kartman Edition (LKE)
 </h1>
 </div>
