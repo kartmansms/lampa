@@ -1,10 +1,7 @@
-<div align="center">
-  <img src="image/K.svg" width="10%" alt="текст" />
-</div>
-<div align="center">
 
+<div align="center">
   <a href="https://www.deepseek.com/" target="_blank">
-    <img alt="Homepage" src="image/K.svg" />
+    <img alt="Homepage" src="image/K.svg" width="10%" />
   </a>
 
 <hr>
