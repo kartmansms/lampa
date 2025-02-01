@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="images/k.svg" width="60%" alt="test" />
+  <img src="images/k.svg" width="60%" alt="https://kartmansms.github.io/lampa/" />
 </div>
 <hr>
 
