@@ -1,10 +1,13 @@
 <div align="center">
   <img src="image/K.svg" width="10%" alt="текст" />
 </div>
+<div align="center">
+
+  <a href="https://www.deepseek.com/" target="_blank">
+    <img alt="Homepage" src="images/K.svg" />
+  </a>
+
 <hr>
-
-
-
 <div align="center">
 <h1>🚀 Lampa Kartman Edition (LKE)
 </h1>
