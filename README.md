@@ -3,7 +3,7 @@
   <a href="https://www.deepseek.com/" target="_blank">
     <img alt="Homepage" src="image/K.svg" width="10%" />
   </a>
-
+</div>
 <hr>
 <div align="center">
 <h1>🚀 Lampa Kartman Edition (LKE)
