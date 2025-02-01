@@ -4,7 +4,7 @@
 <div align="center">
 
   <a href="https://www.deepseek.com/" target="_blank">
-    <img alt="Homepage" src="images/K.svg" />
+    <img alt="Homepage" src="image/K.svg" />
   </a>
 
 <hr>
