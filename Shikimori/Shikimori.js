@@ -446,50 +446,21 @@
       query += ") {\n                    id\n                    name\n                    russian\n                    licenseNameRu\n                    english\n                    japanese\n                    kind\n                    score\n                    status\n                    season\n                    airedOn { year }\n                    poster {\n                        originalUrl\n                    }\n                }\n            }\n        ";
 	  
 	// AJAX-запрос к API Shikimori
-     $.ajax({
-  url: 'https://shikimori.one/api/graphql',
-  method: 'POST',
-  contentType: 'application/json',
-  timeout: 30000,
-  data: JSON.stringify({ query }),
-  success: function(response, textStatus, xhr) {
-    if (xhr.status >= 200 && xhr.status < 300) {
-      const { data, errors } = response;
-      
-      if (errors?.length) {
-        return onerror(new Error(`GraphQL: ${errors[0].message}`));
-      }
-      
-      if (data?.animes?.length) {
-        oncomplite(data.animes);
-      } else {
-        onerror(new Error('Не найдено подходящих аниме'));
-      }
-    } else {
-      onerror(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
-    }
-  },
-  error: function(xhr, textStatus, errorThrown) {
-    let message = textStatus === "timeout" 
-      ? "Превышено время ожидания" 
-      : `Ошибка соединения: ${textStatus}`;
-    
-    if (xhr.status > 0) {
-      message = `Ошибка ${xhr.status}: ${xhr.statusText}`;
-    }
-    
-    const error = new Error(message);
-    error.isNetworkError = !xhr.status;
-    
-    console.error('AJAX Error:', {
-      status: xhr.status,
-      response: xhr.responseText?.substring(0, 200),
-      url: xhr.responseURL
-    });
-    
-    onerror(error);
-  }
-});
+      $.ajax({
+        url: 'https://shikimori.one/api/graphql',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          query: query
+        }),
+        success: function success(response) {
+          oncomplite(response.data.animes);
+        },
+        error: function error(_error) {
+          console.error('Ошибка:', _error);
+          onerror(_error);
+        }
+      });
     });
   }
   
