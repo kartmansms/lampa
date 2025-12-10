@@ -1205,12 +1205,290 @@
 	
 	// Регистрация компонентов и шаблонов
     Lampa.Manifest.plugins = manifest;
-    Lampa.Template.add('ShikimoriStyle', "<style>\n            .Shikimori-catalog--list.category-full{-webkit-box-pack:justify !important;-webkit-justify-content:space-between !important;-ms-flex-pack:justify !important;justify-content:space-between !important}.Shikimori-head.torrent-filter{margin-left:1.5em}.Shikimori.card__type{background:#ff4242;color:#fff}.Shikimori .card__season{position:absolute;left:-0.8em;top:3.4em;padding:.4em .4em;background:#05f;color:#fff;font-size:.8em;-webkit-border-radius:.3em;border-radius:.3em}.Shikimori .card__status{position:absolute;left:-0.8em;bottom:1em;padding:.4em .4em;background:#ffe216;color:#000;font-size:.8em;-webkit-border-radius:.3em;border-radius:.3em}.Shikimori.card__season.no-season{display:none}\n        </style>");
-    Lampa.Template.add("Shikimori-Card", "<div class=\"Shikimori card selector layer--visible layer--render\">\n                <div class=\"Shikimori card__view\">\n                    <img src=\"{img}\" class=\"Shikimori card__img\" />\n                    <div class=\"Shikimori card__type\">{type}</div>\n                    <div class=\"Shikimori card__vote\">{rate}</div>\n                    <div class=\"Shikimori card__season\">{season}</div>\n                    <div class=\"Shikimori card__status\">{status}</div>\n                </div>\n                <div class=\"Shikimori card__title\">{title}</div>\n            </div>");
+    Lampa.Template.add('ShikimoriStyle', `<style>
+            .Shikimori-module {
+                background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+                min-height: 100vh;
+            }
+            
+            .Shikimori-catalog--list.category-full {
+                -webkit-box-pack: justify !important;
+                -webkit-justify-content: space-between !important;
+                -ms-flex-pack: justify !important;
+                justify-content: space-between !important;
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 20px;
+                padding: 20px;
+                animation: contentFadeIn 0.6s ease forwards;
+                opacity: 0;
+            }
+            
+            @keyframes contentFadeIn {
+                to { opacity: 1; }
+            }
+            
+            .Shikimori-head.torrent-filter {
+                margin: 15px;
+                padding: 15px;
+                background: rgba(30, 30, 30, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 10px;
+                display: flex;
+                gap: 10px;
+            }
+            
+            .Shikimori__home,
+            .Shikimori__search {
+                padding: 10px 20px;
+                border-radius: 8px;
+                background: linear-gradient(135deg, #ff4242, #ff6b6b);
+                color: white;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                border: none;
+                cursor: pointer;
+            }
+            
+            .Shikimori__home:hover,
+            .Shikimori__search:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(255, 66, 66, 0.4);
+            }
+            
+            .Shikimori.card {
+                border-radius: 12px;
+                overflow: hidden;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                position: relative;
+                animation: fadeInUp 0.5s ease;
+            }
+            
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .Shikimori.card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            }
+            
+            .Shikimori.card:active {
+                transform: scale(0.98);
+            }
+            
+            .Shikimori.card__view {
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .Shikimori.card__view::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 60px;
+                background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+                z-index: 1;
+            }
+            
+            .Shikimori.card__img {
+                height: 320px;
+                object-fit: cover;
+                width: 100%;
+                transition: transform 0.5s ease;
+                background: linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%);
+                background-size: 200% 100%;
+                animation: loading 1.5s infinite;
+            }
+            
+            @keyframes loading {
+                0% { background-position: 200% 0; }
+                100% { background-position: -200% 0; }
+            }
+            
+            .Shikimori.card:hover .card__img {
+                transform: scale(1.05);
+            }
+            
+            .Shikimori.card__type {
+                background: linear-gradient(135deg, #ff4242, #ff6b6b);
+                color: #fff;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 11px;
+                letter-spacing: 0.5px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                z-index: 2;
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                padding: 4px 8px;
+            }
+            
+            .Shikimori.card__vote {
+                background: linear-gradient(135deg, #FFD700, #FFA500);
+                color: #000;
+                font-weight: 700;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                z-index: 3;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            }
+            
+            .Shikimori.card__season {
+                position: absolute;
+                left: -0.8em;
+                top: 3.4em;
+                padding: .4em .4em;
+                background: linear-gradient(135deg, #2196F3, #21CBF3);
+                color: #fff;
+                font-size: .8em;
+                border-radius: .3em;
+                font-weight: 600;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                z-index: 2;
+            }
+            
+            .Shikimori.card__status {
+                position: absolute;
+                left: -0.8em;
+                bottom: 1em;
+                padding: .4em .4em;
+                background: linear-gradient(135deg, #FF9800, #FFB74D);
+                color: #000;
+                font-size: .8em;
+                border-radius: .3em;
+                font-weight: 600;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                z-index: 2;
+            }
+            
+            .Shikimori.card__title {
+                font-weight: 600;
+                line-height: 1.3;
+                margin-top: 8px;
+                font-size: 14px;
+                color: #e0e0e0;
+                padding: 0 8px 8px;
+            }
+            
+            .card__season.no-season {
+                display: none;
+            }
+            
+            /* Индикатор загрузки */
+            .Shikimori-loader {
+                display: flex;
+                justify-content: center;
+                padding: 40px;
+            }
+            
+            .Shikimori-loader::after {
+                content: '';
+                width: 50px;
+                height: 50px;
+                border: 3px solid #ff4242;
+                border-top-color: transparent;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+            
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+            
+            /* Индикатор пустого состояния */
+            .Shikimori-empty {
+                text-align: center;
+                padding: 60px 20px;
+                color: #888;
+                font-size: 18px;
+            }
+            
+            /* Стилизация скроллбара */
+            .Shikimori-module::-webkit-scrollbar {
+                width: 8px;
+            }
+            
+            .Shikimori-module::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 4px;
+            }
+            
+            .Shikimori-module::-webkit-scrollbar-thumb {
+                background: linear-gradient(135deg, #ff4242, #ff6b6b);
+                border-radius: 4px;
+            }
+            
+            .Shikimori-module::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(135deg, #ff6b6b, #ff4242);
+            }
+            
+            /* Адаптивный дизайн */
+            @media (max-width: 768px) {
+                .Shikimori.card__img {
+                    height: 240px;
+                }
+                
+                .Shikimori-catalog--list.category-full {
+                    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                    gap: 12px;
+                    padding: 12px;
+                }
+                
+                .Shikimori-head.torrent-filter {
+                    flex-direction: column;
+                    margin: 10px;
+                }
+                
+                .Shikimori__home,
+                .Shikimori__search {
+                    width: 100%;
+                    text-align: center;
+                }
+            }
+            
+            @media (min-width: 769px) and (max-width: 1024px) {
+                .Shikimori-catalog--list.category-full {
+                    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                    gap: 15px;
+                }
+            }
+        </style>`);
+    
+    Lampa.Template.add("Shikimori-Card", `<div class="Shikimori card selector layer--visible layer--render">
+                <div class="Shikimori card__view">
+                    <img src="{img}" class="Shikimori card__img" />
+                    <div class="Shikimori card__type">{type}</div>
+                    <div class="Shikimori card__vote">{rate}</div>
+                    <div class="Shikimori card__season">{season}</div>
+                    <div class="Shikimori card__status">{status}</div>
+                </div>
+                <div class="Shikimori card__title">{title}</div>
+            </div>`);
+    
     Lampa.Component.add(manifest.component, Component$1);
     Component();
     $('body').append(Lampa.Template.get('ShikimoriStyle', {}, true));
-    if (window.appready) add();else {
+    
+    if (window.appready) add();
+    else {
       Lampa.Listener.follow("app", function (e) {
         if (e.type === "ready") add();
       });
