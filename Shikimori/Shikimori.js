@@ -4,7 +4,7 @@
     if (window.plugin_shikimori_ready) return;
     window.plugin_shikimori_ready = true;
 
-    var SETTINGS_KEY = 'shikimori_settings_v1';
+    var SETTINGS_KEY = 'shikimori_settings_v2';
     var GENRES_CACHE_KEY = 'shikimori_genres_cache_v1';
     var TMDB_CACHE_KEY = 'shikimori_tmdb_cache_v1';
     var POSTER_CACHE_KEY = 'shikimori_poster_cache_v1';
@@ -20,7 +20,7 @@
 
     function defaults() {
         return {
-            title_language: 'ru',
+            title_language: 'original',
             hide_adult: true,
             default_sort: 'popularity',
             card_size: 'normal'
@@ -214,14 +214,26 @@
         return data.russian || data.name || data.english || 'Shikimori';
     }
 
+    function originalTitleOf(data) {
+        var settings = readSettings();
+
+        if (settings.title_language === 'original') return data.russian || data.english || '';
+        if (settings.title_language === 'en') return data.name || data.russian || '';
+
+        return data.name || data.english || '';
+    }
+
     function normalizePosterUrl(url) {
         url = url === undefined || url === null ? '' : String(url).trim();
 
         if (!url) return '';
         if (/^\/\//.test(url)) return 'https:' + url;
-        if (/^https?:\/\//.test(url)) return url;
+        
+        if (/^https?:\/\//.test(url)) {
+            return url.replace('shikimori.io', 'shikimori.one').replace('shikimori.me', 'shikimori.one');
+        }
 
-        return SHIKI_HOST + (url.indexOf('/') === 0 ? url : '/' + url);
+        return 'https://shikimori.one' + (url.indexOf('/') === 0 ? url : '/' + url);
     }
 
     function isBadPosterUrl(url) {
@@ -281,11 +293,18 @@
     }
 
     function apiGetJson(url, success, error) {
-        if (window.Lampa && Lampa.Request) {
-            var network = new Lampa.Request();
-            network.timeout(8000);
-            network.silent(url, success, error || function () {});
-        } else {
+        if (window.Lampa && typeof Lampa.Reguest === 'function') {
+            try {
+                var network = new Lampa.Reguest();
+                if (typeof network.timeout === 'function') network.timeout(8000);
+                if (typeof network.silent === 'function') {
+                    network.silent(url, success, error || function () {});
+                    return;
+                }
+            } catch (e) {}
+        }
+
+        if (window.$) {
             $.ajax({
                 url: url,
                 dataType: 'json',
@@ -293,19 +312,49 @@
                 success: success,
                 error: error || function () {}
             });
+        } else {
+            console.error('Shikimori: no network method available');
         }
     }
 
-    function cleanTmdbQuery(str) {
-        if (!str) return '';
-
-        return String(str)
-            .replace(/\b(Season|Part)\s*\d*\.?\d*\b/gi, '')
+    function buildSmartQueries(value, queriesArray) {
+        if (!value) return;
+        var str = String(value);
+        
+        var cleaned = str
+            .replace(/\b(Season|Part|Cour)\s*\d*\.?\d*\b/gi, '')
             .replace(/\b(\d+(st|nd|rd|th)? Season)\b/gi, '')
-            .replace(/\(TV\)/gi, '')
-            .replace(/[^\wа-яёА-ЯЁ\s]/gi, ' ')
+            .replace(/\b(Сезон|Часть|Кур)\s*\d*\.?\d*\b/gi, '')
+            .replace(/\b(\d+(-й|-я|-ое|-е)? Сезон)\b/gi, '')
+            .replace(/[\(\[\{].*?[\)\]\}]/g, '')
+            .replace(/[^\wа-яёА-ЯЁ\s:\-]/gi, ' ')
             .replace(/\s{2,}/g, ' ')
             .trim();
+
+        if (cleaned && queriesArray.indexOf(cleaned) === -1) queriesArray.push(cleaned);
+
+        var splitPos = cleaned.search(/[:\-]/);
+        var shortCleaned = '';
+        if (splitPos > 0) {
+            shortCleaned = cleaned.substring(0, splitPos).trim();
+            if (shortCleaned && shortCleaned.length > 1 && queriesArray.indexOf(shortCleaned) === -1) {
+                queriesArray.push(shortCleaned);
+            }
+        }
+
+        var stripRegex = /\s+(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th|II|III|IV|V|VI|VII|VIII|IX|X)$/i;
+        
+        var noDigitFull = cleaned.replace(stripRegex, '').trim();
+        if (noDigitFull && noDigitFull !== cleaned && noDigitFull.length > 1 && queriesArray.indexOf(noDigitFull) === -1) {
+            queriesArray.push(noDigitFull);
+        }
+
+        if (shortCleaned) {
+            var noDigitShort = shortCleaned.replace(stripRegex, '').trim();
+            if (noDigitShort && noDigitShort !== shortCleaned && noDigitShort.length > 1 && queriesArray.indexOf(noDigitShort) === -1) {
+                queriesArray.push(noDigitShort);
+            }
+        }
     }
 
     function getAnimeYear(data) {
@@ -363,14 +412,9 @@
         var queries = [];
         var year = getAnimeYear(data);
 
-        function addQuery(value) {
-            value = cleanTmdbQuery(value);
-            if (value && queries.indexOf(value) === -1) queries.push(value);
-        }
-
-        addQuery(data.english);
-        addQuery(data.name);
-        addQuery(data.russian);
+        buildSmartQueries(data.english, queries);
+        buildSmartQueries(data.name, queries);
+        buildSmartQueries(data.russian, queries);
 
         if (!queries.length) {
             callback('');
@@ -406,7 +450,18 @@
                                 ? parseInt(item.first_air_date.substring(0, 4), 10)
                                 : (item.release_date ? parseInt(item.release_date.substring(0, 4), 10) : 0);
 
-                            if (itemYear && Math.abs(itemYear - year) <= 1) {
+                            var isValidYear = false;
+                            if (item.media_type === 'tv') {
+                                if (!itemYear || (year >= itemYear - 2 && year <= itemYear + 20)) {
+                                    isValidYear = true;
+                                }
+                            } else {
+                                if (!itemYear || Math.abs(itemYear - year) <= 2) {
+                                    isValidYear = true;
+                                }
+                            }
+
+                            if (isValidYear) {
                                 best = item;
                                 break;
                             }
@@ -599,10 +654,14 @@
             callback([]);
         };
 
-        if (window.Lampa && Lampa.Request) {
-            var network = new Lampa.Request();
-            network.timeout(12000);
-            network.silent(url, onSuccess, onError);
+        if (window.Lampa && typeof Lampa.Reguest === 'function') {
+            try {
+                var network = new Lampa.Reguest();
+                network.timeout(12000);
+                network.silent(url, onSuccess, onError);
+            } catch (e) {
+                $.ajax({ url: url, dataType: 'json', timeout: 12000, success: onSuccess, error: onError });
+            }
         } else {
             $.ajax({
                 url: url,
@@ -686,20 +745,7 @@
                     error: onError
                 });
             } else {
-                if (window.Lampa && Lampa.Request) {
-                    var network = new Lampa.Request();
-                    network.timeout(15000);
-                    network.silent(url, onSuccess, onError);
-                } else {
-                    $.ajax({
-                        url: url,
-                        method: 'GET',
-                        dataType: 'json',
-                        timeout: 15000,
-                        success: onSuccess,
-                        error: onError
-                    });
-                }
+                apiGetJson(url, onSuccess, onError);
             }
         };
 
@@ -727,57 +773,19 @@
             else fallbackSearch(data);
         };
 
-        if (window.Lampa && Lampa.Request) {
-            var network = new Lampa.Request();
-            network.timeout(8000);
-            network.silent(url, onSuccess, function () {
-                fallbackSearch(data);
-            });
-        } else {
-            $.ajax({
-                url: url,
-                dataType: 'json',
-                timeout: 8000,
-                success: onSuccess,
-                error: function () {
-                    fallbackSearch(data);
-                }
-            });
-        }
+        apiGetJson(url, onSuccess, function () {
+            fallbackSearch(data);
+        });
     }
 
     function fallbackSearch(data) {
         var queries = [];
 
-        function clean(str) {
-            if (!str) return '';
+        buildSmartQueries(data.english, queries);
+        buildSmartQueries(data.name, queries);
+        buildSmartQueries(data.russian, queries);
 
-            var s = str
-                .replace(/\b(Season|Part)\s*\d*\.?\d*\b/gi, '')
-                .replace(/\b(\d+(st|nd|rd|th)? Season)\b/gi, '')
-                .replace(/\(TV\)/gi, '')
-                .replace(/[^\w\s]/gi, ' ')
-                .replace(/\s{2,}/g, ' ');
-
-            return s.trim();
-        }
-
-        var eng = data.english || '';
-        var romaji = data.name || '';
-
-        var bestEng = (clean(eng) && clean(eng).length < eng.length) ? clean(eng) : eng;
-        var bestRomaji = (clean(romaji) && clean(romaji).length < romaji.length) ? clean(romaji) : romaji;
-
-        if (bestEng) queries.push(bestEng);
-        if (bestRomaji && bestRomaji !== bestEng) queries.push(bestRomaji);
-
-        var uniqueQueries = [];
-
-        for (var i = 0; i < queries.length; i++) {
-            if (uniqueQueries.indexOf(queries[i]) === -1 && queries[i].length > 1) uniqueQueries.push(queries[i]);
-        }
-
-        if (uniqueQueries.length === 0) {
+        if (queries.length === 0) {
             openLampaSearch(data);
             return;
         }
@@ -786,12 +794,12 @@
         var shikiYear = data.airedOn && data.airedOn.year ? parseInt(data.airedOn.year, 10) : 0;
 
         function tryNextQuery() {
-            if (currentIndex >= uniqueQueries.length) {
+            if (currentIndex >= queries.length) {
                 openLampaSearch(data);
                 return;
             }
 
-            var currentQuery = uniqueQueries[currentIndex++];
+            var currentQuery = queries[currentIndex++];
             var apiKey = '4ef0d7355d9ffb5151e987764708ce96';
             var lang = (window.Lampa && Lampa.Storage) ? Lampa.Storage.get('language', 'ru') : 'ru';
             var baseUrl = 'https://api.themoviedb.org/3/';
@@ -816,7 +824,20 @@
                                     ? parseInt(item.first_air_date.substring(0, 4), 10)
                                     : (item.release_date ? parseInt(item.release_date.substring(0, 4), 10) : null);
 
-                                if (itemYear && Math.abs(itemYear - shikiYear) <= 1) {
+                                var isValidYear = false;
+                                if (item.media_type === 'tv') {
+                                    // TMDB tv year is the start of Season 1.
+                                    // Shikimori season year will be >= TMDB year.
+                                    if (!itemYear || (shikiYear >= itemYear - 2 && shikiYear <= itemYear + 20)) {
+                                        isValidYear = true;
+                                    }
+                                } else {
+                                    if (!itemYear || Math.abs(itemYear - shikiYear) <= 2) {
+                                        isValidYear = true;
+                                    }
+                                }
+
+                                if (isValidYear) {
                                     bestItem = item;
                                     break;
                                 }
@@ -833,19 +854,7 @@
                 }
             };
 
-            if (window.Lampa && Lampa.Request) {
-                var network = new Lampa.Request();
-                network.timeout(6000);
-                network.silent(url, handleSuccess, tryNextQuery);
-            } else {
-                $.ajax({
-                    url: url,
-                    dataType: 'json',
-                    timeout: 6000,
-                    success: handleSuccess,
-                    error: tryNextQuery
-                });
-            }
+            apiGetJson(url, handleSuccess, tryNextQuery);
         }
 
         notify('Поиск в базе...');
@@ -870,13 +879,18 @@
     function openTmdb(item, shiki) {
         var type = item.media_type || item.type || (shiki.kind === 'movie' ? 'movie' : 'tv');
 
+        var mainTitle = titleOf(shiki) || item.title || item.name;
+        var secTitle = originalTitleOf(shiki) || item.original_title || item.original_name || shiki.name;
+        var shikiPoster = posterOf(shiki);
+
         var movie = {
             id: item.id || item.tmdb_id || item.themoviedb,
-            title: item.title || item.name || titleOf(shiki),
-            original_title: item.original_title || item.original_name || shiki.name,
-            name: item.name || item.title || titleOf(shiki),
-            original_name: item.original_name || item.original_title || shiki.name,
-            poster_path: item.poster_path || '',
+            title: mainTitle,
+            original_title: secTitle,
+            name: mainTitle,
+            original_name: secTitle,
+            poster_path: shikiPoster || item.poster_path || '',
+            img: shikiPoster || '',
             backdrop_path: item.backdrop_path || '',
             vote_average: item.vote_average || 0,
             shikimori: shiki
@@ -2274,17 +2288,11 @@
         var year = getCardYear(card);
         var queries = [];
 
-        function add(value) {
-            value = cleanTmdbQuery(value);
-
-            if (value && queries.indexOf(value) === -1) queries.push(value);
-        }
-
-        add(card.title);
-        add(card.name);
-        add(card.original_title);
-        add(card.original_name);
-        add(activity && activity.title);
+        buildSmartQueries(card.title, queries);
+        buildSmartQueries(card.name, queries);
+        buildSmartQueries(card.original_title, queries);
+        buildSmartQueries(card.original_name, queries);
+        buildSmartQueries(activity && activity.title, queries);
 
         if (!queries.length) {
             callback(null);
@@ -2313,11 +2321,25 @@
 
                         if (year && item.aired_on) {
                             var itemYear = parseInt(String(item.aired_on).substring(0, 4), 10);
+                            var isTv = item.kind === 'tv';
 
-                            if (itemYear && Math.abs(itemYear - year) <= 1) {
+                            var isValidYear = false;
+                            if (isTv) {
+                                if (itemYear >= year - 2 && itemYear <= year + 20) {
+                                    isValidYear = true;
+                                }
+                            } else {
+                                if (Math.abs(itemYear - year) <= 2) {
+                                    isValidYear = true;
+                                }
+                            }
+
+                            if (isValidYear) {
                                 best = item;
                                 break;
                             }
+                        } else if (!year) {
+                            break;
                         }
                     }
                 }
