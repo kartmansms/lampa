@@ -23,7 +23,8 @@
             title_language: 'original',
             hide_adult: true,
             default_sort: 'popularity',
-            card_size: 'normal'
+            card_size: 'normal',
+            shiki_host: 'https://shikimori.one'
         };
     }
 
@@ -81,6 +82,11 @@
 
     function saveSettings(settings) {
         storageSet(SETTINGS_KEY, settings || defaults());
+    }
+
+    function getShikiHost() {
+        var settings = readSettings();
+        return (settings.shiki_host || 'https://shikimori.one').replace(/\/$/, '');
     }
 
     function defaultAuth() {
@@ -1513,7 +1519,7 @@
             quick.empty();
             active.empty();
 
-            addHeadButton('Главная', function () {
+            addHeadButton('Главная', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>', function () {
                 openWith({
                     page: 1,
                     sort: readSettings().default_sort,
@@ -1527,12 +1533,12 @@
                 });
             });
 
-            if (isAuthorized()) addHeadButton('Профиль', openProfile);
+            if (isAuthorized()) addHeadButton('Профиль', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>', openProfile);
 
-            addHeadButton('Поиск', openSearch);
-            addHeadButton('Фильтры', openFilters);
-            addHeadButton('Сезоны', openSeasons);
-            addHeadButton('Настройки', openSettings);
+            addHeadButton('Поиск', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>', openSearch);
+            addHeadButton('Фильтры', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>', openFilters);
+            addHeadButton('Сезоны', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>', openSeasons);
+            addHeadButton('Настройки', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>', openSettings);
 
             addQuick('Популярное', {
                 sort: 'popularity',
@@ -1634,8 +1640,8 @@
             });
         }
 
-        function addHeadButton(title, action) {
-            var btn = $('<div class="simple-button selector Shikimori-head__button">' + esc(title) + '</div>');
+        function addHeadButton(title, iconSvg, action) {
+            var btn = $('<div class="simple-button selector Shikimori-head__button">' + iconSvg + '<span>' + esc(title) + '</span></div>');
 
             btn.on('hover:focus nav_focus', function () {
                 last = btn[0];
@@ -1816,52 +1822,169 @@
             }
         }
 
-        function openFilters() {
-            loadGenres(function (genres) {
+        function openFilters(genres) {
+            var show = function (list) {
                 var items = [
-                    { title: 'Сортировка: популярность', value: 'sort:popularity' },
-                    { title: 'Сортировка: рейтинг', value: 'sort:ranked' },
-                    { title: 'TV', value: 'kind:tv' },
-                    { title: 'Movie', value: 'kind:movie' },
-                    { title: 'OVA', value: 'kind:ova' },
-                    { title: 'Онгоинг', value: 'status:ongoing' },
-                    { title: 'Анонс', value: 'status:anons' },
-                    { title: 'Вышло', value: 'status:released' }
+                    {
+                        title: 'Сортировка: ' + sortName(params.sort || readSettings().default_sort),
+                        value: 'sort'
+                    },
+                    {
+                        title: 'Тип: ' + (params.kind ? kindName(params.kind) : 'любой'),
+                        value: 'kind'
+                    },
+                    {
+                        title: 'Статус: ' + (params.status ? statusName(params.status) : 'любой'),
+                        value: 'status'
+                    },
+                    {
+                        title: 'Жанр: ' + (params.genre_title || 'любой'),
+                        value: 'genre'
+                    }
                 ];
 
-                for (var i = 0; i < genres.length; i++) {
-                    if (genres[i] && genres[i].id) {
-                        items.push({
-                            title: 'Жанр: ' + (genres[i].russian || genres[i].name || genres[i].id),
-                            value: 'genre:' + genres[i].id + ':' + (genres[i].russian || genres[i].name || genres[i].id)
-                        });
-                    }
+                if (hasFilterSelection()) {
+                    items.push({
+                        title: 'Сбросить фильтры',
+                        value: 'reset'
+                    });
                 }
-
-                if (!genres.length) items.push({
-                    title: 'Жанры недоступны',
-                    value: 'noop'
-                });
 
                 Lampa.Select.show({
                     title: 'Фильтры',
                     items: items,
                     onSelect: function (item) {
-                        if (item.value === 'noop') return;
-
-                        var parts = String(item.value).split(':');
-                        var out = {};
-
-                        out[parts[0]] = parts[1];
-
-                        if (parts[0] === 'genre') out.genre_title = parts.slice(2).join(':') || parts[1];
-
-                        openWith(out);
+                        if (item.value === 'sort') openFilterSortMenu(list);
+                        else if (item.value === 'kind') openFilterKindMenu(list);
+                        else if (item.value === 'status') openFilterStatusMenu(list);
+                        else if (item.value === 'genre') openFilterGenreMenu(list);
+                        else if (item.value === 'reset') {
+                            openWith({
+                                sort: readSettings().default_sort,
+                                kind: '',
+                                status: '',
+                                genre: '',
+                                genre_title: '',
+                                page: 1
+                            });
+                        }
                     },
                     onBack: function () {
                         Lampa.Controller.toggle('content');
                     }
                 });
+            };
+
+            if (genres) show(genres);
+            else loadGenres(show);
+        }
+
+        function hasFilterSelection() {
+            return params.kind || params.status || params.genre ||
+                (params.sort && params.sort !== readSettings().default_sort);
+        }
+
+        function openFilterSortMenu(genres) {
+            var current = params.sort || readSettings().default_sort;
+            var items = [
+                { title: selectedTitle(!params.sort || params.sort === readSettings().default_sort, 'По умолчанию'), value: '' },
+                { title: selectedTitle(current === 'popularity', 'Популярность'), value: 'popularity' },
+                { title: selectedTitle(current === 'ranked', 'Рейтинг'), value: 'ranked' },
+                { title: selectedTitle(current === 'aired_on', 'Дата выхода'), value: 'aired_on' }
+            ];
+
+            Lampa.Select.show({
+                title: 'Сортировка',
+                items: items,
+                onSelect: function (item) {
+                    openWith({ sort: item.value, page: 1 });
+                },
+                onBack: function () {
+                    openFilters(genres);
+                }
+            });
+        }
+
+        function openFilterKindMenu(genres) {
+            var current = params.kind || '';
+            var items = [
+                { title: selectedTitle(!current, 'Любой'), value: '' },
+                { title: selectedTitle(current === 'tv', 'TV'), value: 'tv' },
+                { title: selectedTitle(current === 'movie', 'Movie'), value: 'movie' },
+                { title: selectedTitle(current === 'ova', 'OVA'), value: 'ova' },
+                { title: selectedTitle(current === 'ona', 'ONA'), value: 'ona' },
+                { title: selectedTitle(current === 'special', 'Special'), value: 'special' }
+            ];
+
+            Lampa.Select.show({
+                title: 'Тип',
+                items: items,
+                onSelect: function (item) {
+                    openWith({ kind: item.value, page: 1 });
+                },
+                onBack: function () {
+                    openFilters(genres);
+                }
+            });
+        }
+
+        function openFilterStatusMenu(genres) {
+            var current = params.status || '';
+            var items = [
+                { title: selectedTitle(!current, 'Любой'), value: '' },
+                { title: selectedTitle(current === 'ongoing', 'Онгоинг'), value: 'ongoing' },
+                { title: selectedTitle(current === 'anons', 'Анонс'), value: 'anons' },
+                { title: selectedTitle(current === 'released', 'Вышло'), value: 'released' }
+            ];
+
+            Lampa.Select.show({
+                title: 'Статус',
+                items: items,
+                onSelect: function (item) {
+                    openWith({ status: item.value, page: 1 });
+                },
+                onBack: function () {
+                    openFilters(genres);
+                }
+            });
+        }
+
+        function openFilterGenreMenu(genres) {
+            var items = [
+                { title: selectedTitle(!params.genre, 'Любой'), value: '' }
+            ];
+
+            for (var i = 0; i < genres.length; i++) {
+                if (genres[i] && genres[i].id) {
+                    var genreTitle = genres[i].russian || genres[i].name || genres[i].id;
+
+                    items.push({
+                        title: selectedTitle(String(params.genre || '') === String(genres[i].id), genreTitle),
+                        value: String(genres[i].id),
+                        genre_title: genreTitle
+                    });
+                }
+            }
+
+            if (items.length === 1) {
+                items.push({ title: 'Жанры недоступны', value: 'noop' });
+            }
+
+            Lampa.Select.show({
+                title: 'Жанры',
+                items: items,
+                onSelect: function (item) {
+                    if (item.value === 'noop') return;
+
+                    openWith({
+                        genre: item.value,
+                        genre_title: item.genre_title || '',
+                        page: 1
+                    });
+                },
+                onBack: function () {
+                    openFilters(genres);
+                }
             });
         }
 
@@ -1915,12 +2038,33 @@
             });
         }
 
+        function titleLanguageName(lang) {
+            if (lang === 'original') return 'оригинал';
+            if (lang === 'en') return 'английский';
+            return 'русский';
+        }
+
+        function selectedTitle(isSelected, title) {
+            return (isSelected ? '✓ ' : '   ') + title;
+        }
+
+        function saveVisualSetting(key, value) {
+            var settings = readSettings();
+            settings[key] = value;
+            saveSettings(settings);
+            notify('Настройки Shikimori сохранены');
+            openWith({
+                page: 1,
+                sort: settings.default_sort
+            });
+        }
+
         function openSettings() {
             var settings = readSettings();
 
             var items = [
                 {
-                    title: 'Язык названий: ' + (settings.title_language === 'original' ? 'оригинал' : (settings.title_language === 'en' ? 'английский' : 'русский')),
+                    title: 'Язык названий: ' + titleLanguageName(settings.title_language),
                     value: 'title_language'
                 },
                 {
@@ -1934,6 +2078,10 @@
                 {
                     title: 'Размер карточек: ' + (settings.card_size === 'compact' ? 'компактный' : 'обычный'),
                     value: 'card_size'
+                },
+                {
+                    title: 'Домен Shikimori: ' + (settings.shiki_host || 'https://shikimori.one'),
+                    value: 'shiki_host'
                 },
                 {
                     title: 'Очистить кэш поиска TMDB',
@@ -1950,13 +2098,20 @@
                 items: items,
                 onSelect: function (item) {
                     if (item.value === 'title_language') {
-                        settings.title_language = settings.title_language === 'ru' ? 'original' : (settings.title_language === 'original' ? 'en' : 'ru');
+                        openTitleLanguageSettings();
+                        return;
                     } else if (item.value === 'hide_adult') {
-                        settings.hide_adult = !settings.hide_adult;
+                        openHideAdultSettings();
+                        return;
                     } else if (item.value === 'default_sort') {
-                        settings.default_sort = settings.default_sort === 'popularity' ? 'ranked' : (settings.default_sort === 'ranked' ? 'aired_on' : 'popularity');
+                        openDefaultSortSettings();
+                        return;
                     } else if (item.value === 'card_size') {
-                        settings.card_size = settings.card_size === 'normal' ? 'compact' : 'normal';
+                        openCardSizeSettings();
+                        return;
+                    } else if (item.value === 'shiki_host') {
+                        openShikiHostSettings();
+                        return;
                     } else if (item.value === 'clear_tmdb_cache') {
                         storageSet(TMDB_CACHE_KEY, {});
                         storageSet(POSTER_CACHE_KEY, {});
@@ -1966,19 +2121,119 @@
                         openAuthSettings();
                         return;
                     }
-
-                    saveSettings(settings);
-                    notify('Настройки Shikimori сохранены');
-
-                    if (['title_language', 'hide_adult', 'default_sort', 'card_size'].indexOf(item.value) !== -1) {
-                        openWith({
-                            page: 1,
-                            sort: settings.default_sort
-                        });
-                    }
                 },
                 onBack: function () {
                     Lampa.Controller.toggle('content');
+                }
+            });
+        }
+
+        function openTitleLanguageSettings() {
+            var settings = readSettings();
+            var items = [
+                { title: selectedTitle(settings.title_language === 'original', 'Оригинал'), value: 'original' },
+                { title: selectedTitle(settings.title_language === 'en', 'Английский'), value: 'en' },
+                { title: selectedTitle(settings.title_language === 'ru', 'Русский'), value: 'ru' }
+            ];
+
+            Lampa.Select.show({
+                title: 'Язык названий',
+                items: items,
+                onSelect: function (item) {
+                    saveVisualSetting('title_language', item.value);
+                },
+                onBack: function () {
+                    openSettings();
+                }
+            });
+        }
+
+        function openHideAdultSettings() {
+            var settings = readSettings();
+            var items = [
+                { title: selectedTitle(settings.hide_adult, 'Да'), value: 'true' },
+                { title: selectedTitle(!settings.hide_adult, 'Нет'), value: 'false' }
+            ];
+
+            Lampa.Select.show({
+                title: 'Скрывать 18+',
+                items: items,
+                onSelect: function (item) {
+                    saveVisualSetting('hide_adult', item.value === 'true');
+                },
+                onBack: function () {
+                    openSettings();
+                }
+            });
+        }
+
+        function openDefaultSortSettings() {
+            var settings = readSettings();
+            var items = [
+                { title: selectedTitle(settings.default_sort === 'popularity', 'Популярность'), value: 'popularity' },
+                { title: selectedTitle(settings.default_sort === 'ranked', 'Рейтинг'), value: 'ranked' },
+                { title: selectedTitle(settings.default_sort === 'aired_on', 'Дата выхода'), value: 'aired_on' }
+            ];
+
+            Lampa.Select.show({
+                title: 'Сортировка по умолчанию',
+                items: items,
+                onSelect: function (item) {
+                    saveVisualSetting('default_sort', item.value);
+                },
+                onBack: function () {
+                    openSettings();
+                }
+            });
+        }
+
+        function openCardSizeSettings() {
+            var settings = readSettings();
+            var items = [
+                { title: selectedTitle(settings.card_size === 'normal', 'Обычный'), value: 'normal' },
+                { title: selectedTitle(settings.card_size === 'compact', 'Компактный'), value: 'compact' }
+            ];
+
+            Lampa.Select.show({
+                title: 'Размер карточек',
+                items: items,
+                onSelect: function (item) {
+                    saveVisualSetting('card_size', item.value);
+                },
+                onBack: function () {
+                    openSettings();
+                }
+            });
+        }
+
+        function openShikiHostSettings() {
+            var settings = readSettings();
+            var items = [
+                { title: 'shikimori.one', value: 'https://shikimori.one' },
+                { title: 'shikimori.io', value: 'https://shikimori.io' },
+                { title: 'Ввести вручную', value: 'custom' }
+            ];
+
+            Lampa.Select.show({
+                title: 'Домен Shikimori',
+                items: items,
+                onSelect: function (item) {
+                    if (item.value === 'custom') {
+                        askText('Домен Shikimori (с https://)', settings.shiki_host, function (value) {
+                            if (value && value.indexOf('https://') === 0) {
+                                settings.shiki_host = value.replace(/\/$/, '');
+                                saveSettings(settings);
+                                notify('Домен Shikimori изменён');
+                            }
+                        });
+                    } else {
+                        settings.shiki_host = item.value;
+                        saveSettings(settings);
+                        notify('Домен Shikimori изменён');
+                    }
+                },
+                onBack: function () {
+                    openSettings();
                 }
             });
         }
@@ -2571,10 +2826,24 @@
                 '.Shikimori-module{padding:1.2em 1.5em 2.5em;color:#fff;height:100%;display:flex;flex-direction:column;box-sizing:border-box}' +
                 '.Shikimori-module>.scroll{flex:1;overflow:hidden;position:relative;width:100%}' +
                 '.Shikimori-module .scroll__body{width:100%}' +
-                '.Shikimori-head,.Shikimori-quick{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:horizontal;-webkit-box-direction:normal;-ms-flex-flow:row wrap;flex-flow:row wrap;margin-bottom:.75em}' +
-                '.Shikimori-head__button,.Shikimori-chip,.Shikimori-more{margin:0 .55em .55em 0;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08)}' +
-                '.Shikimori-head__button.focus,.Shikimori-chip.focus,.Shikimori-more.focus{background:#c83a4b;color:#fff;border-color:#e95a68}' +
-                '.Shikimori-chip--active{background:rgba(200,58,75,.28);border-color:rgba(200,58,75,.7)}' +
+                '.Shikimori-head{display:flex;flex-wrap:wrap;margin-bottom:0.8em;gap:0.3em;}' +
+                '.Shikimori-quick{display:flex;flex-wrap:wrap;margin-bottom:0.8em;gap:0.25em;}' +
+                '.Shikimori-head__button,.Shikimori-chip,.Shikimori-more{' +
+                    'display:inline-flex!important;align-items:center!important;justify-content:center!important;' +
+                    'padding:0.65em 1.2em!important;height:auto!important;line-height:1!important;' +
+                    'background:rgba(255,255,255,0.06)!important;border:1px solid rgba(255,255,255,0.04)!important;' +
+                    'color:rgba(255,255,255,0.85);font-size:0.95em;font-weight:500;margin:0 0.3em 0.3em 0!important;' +
+                    'transition:all 0.2s ease-in-out;border-radius:0.5em!important;outline:none!important;box-shadow:none!important;' +
+                '}' +
+                '.Shikimori-chip{border-radius:1.5em!important;padding:0.5em 1.2em!important;font-size:0.88em;opacity:0.85;}' +
+                '.Shikimori-head__button svg{width:1.15em;height:1.15em;margin-right:0.45em;opacity:0.85;flex-shrink:0;transition:transform 0.2s;}' +
+                '.Shikimori-head__button.focus,.Shikimori-chip.focus,.Shikimori-more.focus{' +
+                    'background:#c83a4b!important;color:#fff!important;' +
+                    'border-color:#e95a68!important;transform:scale(1.05);' +
+                    'box-shadow:0 0.4em 1.2em rgba(200,58,75,0.35)!important;' +
+                '}' +
+                '.Shikimori-head__button.focus svg{transform:scale(1.1);opacity:1;}' +
+                '.Shikimori-chip--active{background:rgba(200,58,75,0.22)!important;border-color:rgba(200,58,75,0.55)!important;color:#ff8e9b!important;opacity:1;}' +
                 '.Shikimori-active{font-size:1.05em;color:rgba(255,255,255,.62);margin:.15em 0 1em;line-height:1.35}' +
                 '.Shikimori-active span{color:#e95a68;font-weight:600}' +
                 '.Shikimori-body{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:horizontal;-webkit-box-direction:normal;-ms-flex-flow:row wrap;flex-flow:row wrap;align-items:flex-start;justify-content:flex-start;padding:1em .5em}' +
