@@ -855,7 +855,7 @@
             return;
         }
 
-        var armUrl = armLookupUrl(data.id);
+        var armUrl = armLookupUrl(data.malId || data.id);
 
         apiGetJson(armUrl, function (answer) {
             var tmdbId = answer && (answer.themoviedb || answer.tmdb_id || answer.id);
@@ -1061,29 +1061,26 @@
      * @see {@link openLampaSearch} для ручного поиска Lampa
      */
     function openAnime(data) {
-        var tmdbCache = storageGet(TMDB_CACHE_KEY, {});
-
-        if (tmdbCache[data.id] && tmdbCache[data.id].id) {
-            openTmdb({
-                id: tmdbCache[data.id].id,
-                media_type: tmdbCache[data.id].type
-            }, data);
-            return;
-        }
-
-        var url = armLookupUrl(data.id);
+        var url = armLookupUrl(data.malId || data.id);
+        var expectedYear = getAnimeYear(data);
+        var expectedType = data.kind === 'movie' ? 'movie' : 'tv';
 
         var onSuccess = function (answer) {
             if (answer && answer.themoviedb) {
                 var armType = answer.media_type || answer.type || '';
-                var expectedType = data.kind === 'movie' ? 'movie' : 'tv';
 
                 if (armType && armType !== expectedType) {
                     fallbackSearch(data);
                     return;
                 }
 
-                openTmdb(answer, data);
+                verifyTmdbResult(answer.themoviedb, expectedType, expectedYear, data, function (ok) {
+                    if (ok) {
+                        openTmdb(answer, data);
+                    } else {
+                        fallbackSearch(data);
+                    }
+                });
             } else {
                 fallbackSearch(data);
             }
@@ -1091,6 +1088,47 @@
 
         apiGetJson(url, onSuccess, function () {
             fallbackSearch(data);
+        });
+    }
+
+    function normalizeForCompare(str) {
+        return String(str || '').toLowerCase().replace(/×/g, 'x').replace(/[^a-z0-9а-яё]/g, '');
+    }
+
+    function verifyTmdbResult(tmdbId, type, expectedYear, shikiData, callback) {
+        var path = (type === 'movie' ? 'movie/' : 'tv/') + tmdbId + '?api_key=' + TMDB_API_KEY + '&language=' + encodeURIComponent(tmdbLanguage());
+        var url = tmdbApiUrl(path);
+
+        apiGetJson(url, function (res) {
+            if (!res) { callback(true); return; }
+
+            var date = res.release_date || res.first_air_date || '';
+            var tmdbYear = parseInt(String(date).substring(0, 4), 10);
+
+            if (expectedYear && tmdbYear && tmdbYear > expectedYear + 1) {
+                callback(false);
+                return;
+            }
+
+            var tmdbName = normalizeForCompare(res.original_title || res.original_name || res.title || res.name);
+            var shikiName = normalizeForCompare(shikiData.name);
+            var shikiEn = normalizeForCompare(shikiData.english);
+            var shikiRu = normalizeForCompare(shikiData.russian);
+
+            if (tmdbName && shikiName) {
+                var nameMatch = tmdbName.indexOf(shikiName) !== -1 || shikiName.indexOf(tmdbName) !== -1;
+                var enMatch = shikiEn && (tmdbName.indexOf(shikiEn) !== -1 || shikiEn.indexOf(tmdbName) !== -1);
+                var ruMatch = shikiRu && (tmdbName.indexOf(shikiRu) !== -1 || shikiRu.indexOf(tmdbName) !== -1);
+
+                if (!nameMatch && !enMatch && !ruMatch) {
+                    callback(false);
+                    return;
+                }
+            }
+
+            callback(true);
+        }, function () {
+            callback(true);
         });
     }
 
@@ -3033,6 +3071,7 @@
 
         return {
             id: item.id,
+            malId: item.malId || item.mal_id || '',
             name: item.name,
             russian: item.russian,
             english: item.english || '',
@@ -3123,18 +3162,8 @@
 
                         if (year && item.aired_on) {
                             var itemYear = parseInt(String(item.aired_on).substring(0, 4), 10);
-                            var isTv = item.kind === 'tv';
 
-                            var isValidYear = false;
-                            if (isTv) {
-                                if (itemYear >= year - 2 && itemYear <= year + 20) {
-                                    isValidYear = true;
-                                }
-                            } else {
-                                if (Math.abs(itemYear - year) <= 2) {
-                                    isValidYear = true;
-                                }
-                            }
+                            var isValidYear = Math.abs(itemYear - year) <= 1;
 
                             if (isValidYear) {
                                 best = item;
