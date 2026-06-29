@@ -38,6 +38,35 @@
     var fullResolveCache = {};
     var fullPollId = null;
 
+    // ─── GraphQL Helper ──────────────────────────────────────────────
+
+    function gqlQuery(query, callback, error) {
+        var url = getShikiHost() + '/api/graphql';
+        var body = JSON.stringify({ query: query });
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            contentType: 'application/json',
+            dataType: 'json',
+            timeout: 12000,
+            headers: { 'User-Agent': 'LampaShikimoriPlugin' },
+            data: body,
+            success: function (res) {
+                if (res && res.errors && res.errors.length) {
+                    if (error) error(res.errors[0].message);
+                    else callback(null);
+                    return;
+                }
+                callback(res && res.data ? res.data : null);
+            },
+            error: function (xhr) {
+                if (error) error(xhr);
+                else callback(null);
+            }
+        });
+    }
+
     function defaults() {
         return {
             title_language: 'original',
@@ -933,24 +962,9 @@
     // ─── Genres & API ──────────────────────────────────────────────────
 
     /**
-     * Загрузить жанры из API Shikimori (с локальным кешем на 24ч).
-     *
-     * Кеш хранится в формате {genres: [...], ts: timestamp}.
-     * При чтении проверяется TTL: если прошло > 24ч — загружается заново.
-     *
-     * API: GET {shiki_host}/api/genres
-     * Ответ: Array<{id, name, russian, entry_type}>
-     *
-     * Фильтрует:
-     * - Взрослые жанры (hentai, erotica, yaoi, yuri) если hide_adult=true
-     * - Не-аниме жанры (entry_type !== 'Anime')
+     * Загрузить жанры из Shikimori GraphQL API (с локальным кешем на 24ч).
      *
      * @param {Function} callback - Вызывается с отфильтрованным списком жанров
-     *
-     * @example
-     * loadGenres(function(genres) {
-     *     genres.forEach(function(g) { console.log(g.id, g.russian); });
-     * });
      */
     function loadGenres(callback) {
         var cache = storageGet(GENRES_CACHE_KEY, null);
@@ -961,95 +975,70 @@
             return;
         }
 
-        var url = getShikiHost() + '/api/genres';
-
-        var onSuccess = function (genres) {
-            if (!genres || !genres.length) {
+        gqlQuery('{ genres(entryType: Anime) { id name russian } }', function (data) {
+            if (!data || !data.genres || !data.genres.length) {
                 callback([]);
                 return;
             }
 
-            storageSet(GENRES_CACHE_KEY, { genres: genres, ts: Date.now() });
-            callback(filterGenres(genres));
-        };
-
-        var onError = function () {
+            storageSet(GENRES_CACHE_KEY, { genres: data.genres, ts: Date.now() });
+            callback(filterGenres(data.genres));
+        }, function () {
             callback([]);
-        };
-
-        apiGetJson(url, onSuccess, onError);
+        });
     }
 
     /**
-     * Запрос списка аниме из API Shikimori.
+     * Запрос списка аниме из Shikimori GraphQL API.
      *
-     * API: GET {shiki_host}/api/animes?limit=48&page=N&order=sort&search=&kind=&status=&season=&genre=&mylist=
-     *
-     * Параметры фильтрации (все опциональны):
-     * - page: номер страницы (по умолчанию 1)
-     * - sort: сортировка ('popularity'|'ranked'|'aired_on'|'name')
-     * - search: поисковый запрос
-     * - kind: тип ('tv'|'movie'|'ova'|'ona'|'special')
-     * - status: статус ('ongoing'|'anons'|'released')
-     * - season: сезон ('winter_2024', '2024', '2020_2024')
-     * - genre: ID жанра
-     * - mylist: список пользователя ('watching'|'planned'|'completed'|'rewatching'|'on_hold'|'dropped')
-     *
-     * Если mylist задан — запрос выполняется с Authorization заголовком.
-     * Ответ маппится через mapShikiAnime() во внутренний формат.
+     * Использует GraphQL вместо REST для получения полных URL постеров.
      *
      * @param {Object} params - Параметры запроса
      * @param {Function} oncomplete - Вызывается с массивом маппинга аниме
      * @param {Function} [onerror] - Колбэк ошибки (опционально)
-     *
-     * @see {@link mapShikiAnime} для маппинга ответа
-     * @see {@link PAGE_LIMIT} для лимита на страницу (48)
      */
     function requestAnime(params, oncomplete, onerror) {
         var page = parseInt(params.page, 10) || 1;
         var sort = params.sort || readSettings().default_sort;
 
-        var doREST = function (token) {
-            var url = getShikiHost() + '/api/animes?limit=' + PAGE_LIMIT + '&page=' + page + '&order=' + encodeURIComponent(sort);
+        var args = [];
+        args.push('limit: ' + PAGE_LIMIT);
+        args.push('page: ' + page);
 
-            if (params.search) url += '&search=' + encodeURIComponent(params.search);
-            if (params.kind) url += '&kind=' + encodeURIComponent(params.kind);
-            if (params.status) url += '&status=' + encodeURIComponent(params.status);
-            if (params.season) url += '&season=' + encodeURIComponent(params.season);
-            if (params.genre) url += '&genre=' + encodeURIComponent(params.genre);
-            if (params.mylist) url += '&mylist=' + encodeURIComponent(params.mylist);
+        var orderMap = { popularity: 'popularity', ranked: 'ranked', aired_on: 'aired_on', name: 'name' };
+        if (orderMap[sort]) args.push('order: ' + orderMap[sort]);
 
-            var onSuccess = function (data) {
-                if (!Array.isArray(data)) {
-                    if (data && data.errors) notify('Shikimori: Ошибка запроса к API');
-                    oncomplete([]);
-                    return;
-                }
+        if (params.search) args.push('search: "' + params.search.replace(/"/g, '\\"') + '"');
+        if (params.kind) args.push('kind: "' + params.kind + '"');
+        if (params.status) args.push('status: "' + params.status + '"');
+        if (params.season) args.push('season: "' + params.season + '"');
+        if (params.genre) args.push('genre: "' + params.genre + '"');
 
-                var mapped = [];
+        var query = '{ animes(' + args.join(', ') + ') { ' +
+            'id name russian english kind status score ' +
+            'episodes episodesAired season ' +
+            'poster { mainUrl main2xUrl previewUrl miniUrl originalUrl } ' +
+            'genres { id name russian } ' +
+            '} }';
 
-                for (var i = 0; i < data.length; i++) {
-                    var mappedItem = mapShikiAnime(data[i]);
-                    if (mappedItem) mapped.push(mappedItem);
-                }
-
-                oncomplete(mapped);
-            };
-
-            var onError = function (xhr) {
-                notify('Shikimori: не удалось загрузить каталог');
-                if (onerror) onerror(xhr);
-            };
-
-            if (token) {
-                apiRequestAuth('GET', url, null, token, onSuccess, onError);
-            } else {
-                apiGetJson(url, onSuccess, onError);
+        gqlQuery(query, function (data) {
+            if (!data || !data.animes) {
+                oncomplete([]);
+                return;
             }
-        };
 
-        if (params.mylist) withAccessToken(doREST);
-        else doREST(null);
+            var mapped = [];
+
+            for (var i = 0; i < data.animes.length; i++) {
+                var mappedItem = mapShikiAnime(data.animes[i]);
+                if (mappedItem) mapped.push(mappedItem);
+            }
+
+            oncomplete(mapped);
+        }, function () {
+            notify('Shikimori: не удалось загрузить каталог');
+            if (onerror) onerror();
+        });
     }
 
     // ─── Navigation ────────────────────────────────────────────────────
@@ -3033,12 +3022,14 @@
     }
 
     /**
-     * Маппинг сырого ответа API Shikimori во внутренний нормализованный формат.
-     * @param {Object} item - Сырой объект аниме Shikimori
+     * Маппинг ответа Shikimori (REST или GraphQL) во внутренний формат.
+     * @param {Object} item - Объект аниме из API
      * @returns {Object|null} Маппинг данных аниме или null
      */
     function mapShikiAnime(item) {
         if (!item) return null;
+
+        var poster = item.poster || {};
 
         return {
             id: item.id,
@@ -3050,36 +3041,47 @@
             score: item.score,
             status: item.status,
             season: item.season || '',
+            genres: item.genres || [],
             airedOn: {
-                year: item.aired_on ? String(item.aired_on).substring(0, 4) : ''
+                year: item.airedOn && item.airedOn.year ? String(item.airedOn.year) :
+                       item.aired_on ? String(item.aired_on).substring(0, 4) : ''
             },
             poster: {
-                originalUrl: (item.poster && (item.poster.originalUrl || item.poster.original_url)) || (item.image && item.image.original) || '',
-                mainUrl: (item.poster && (item.poster.mainUrl || item.poster.main_url)) || '',
-                previewUrl: (item.poster && (item.poster.previewUrl || item.poster.preview_url)) || (item.image && item.image.preview) || '',
-                x96Url: (item.poster && (item.poster.x96Url || item.poster.x96_url)) || (item.image && item.image.x96) || '',
-                x48Url: (item.poster && (item.poster.x48Url || item.poster.x48_url)) || (item.image && item.image.x48) || ''
+                originalUrl: poster.originalUrl || poster.original_url || (item.image && item.image.original) || '',
+                mainUrl: poster.mainUrl || poster.main_url || '',
+                main2xUrl: poster.main2xUrl || poster.main_2x_url || '',
+                previewUrl: poster.previewUrl || poster.preview_url || (item.image && item.image.preview) || '',
+                miniUrl: poster.miniUrl || poster.mini_url || '',
+                x96Url: poster.x96Url || poster.x96_url || (item.image && item.image.x96) || '',
+                x48Url: poster.x48Url || poster.x48_url || (item.image && item.image.x48) || ''
             },
             image: item.image || null
         };
     }
 
-    /** Загрузить аниме из Shikimori по ID и маппинг во внутренний формат. */
+    /** Загрузить аниме из Shikimori по ID через GraphQL. */
     function fetchShikiAnimeById(id, callback) {
         if (!id) {
             callback(null);
             return;
         }
 
-        apiGetJson(
-            getShikiHost() + '/api/animes/' + encodeURIComponent(id),
-            function (anime) {
-                callback(anime && anime.id ? mapShikiAnime(anime) : null);
-            },
-            function () {
+        var query = '{ animes(ids: "' + String(id) + '") { ' +
+            'id name russian english kind status score ' +
+            'episodes episodesAired season ' +
+            'poster { mainUrl main2xUrl previewUrl miniUrl originalUrl } ' +
+            'genres { id name russian } ' +
+            '} }';
+
+        gqlQuery(query, function (data) {
+            if (data && data.animes && data.animes.length) {
+                callback(mapShikiAnime(data.animes[0]));
+            } else {
                 callback(null);
             }
-        );
+        }, function () {
+            callback(null);
+        });
     }
 
     /** Поиск Shikimori по названию с матчем по годам. Используется для разрешения полной страницы. */
