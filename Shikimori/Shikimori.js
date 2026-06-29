@@ -1100,7 +1100,10 @@
         var url = tmdbApiUrl(path);
 
         apiGetJson(url, function (res) {
-            if (!res) { callback(true); return; }
+            if (!res || (!res.title && !res.name && !res.original_title && !res.original_name)) {
+                callback(false);
+                return;
+            }
 
             var date = res.release_date || res.first_air_date || '';
             var tmdbYear = parseInt(String(date).substring(0, 4), 10);
