@@ -7,15 +7,6 @@
 ```bibtex
  https://kartmansms.github.io/lampa/Shikimori/Shikimori.js
 ```
-
-
-
-**За основу взят код:**  [LME Shikimori](https://lampame.github.io/main/Shikimori/Shikimori.js) `https://lampame.github.io/main/Shikimori/Shikimori.js`
-
-**Переработал код** https://t.me/kartman_sms
-
-
-
 Данный код представляет собой плагин для медиа-приложения Lampа, который добавляет интеграцию с каталогом аниме Shikimori. Ключевых функциях:
 
 ### 1. **Доступ к каталогу Shikimori**
