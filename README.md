@@ -61,7 +61,6 @@ installPosterFallback(img, urls, fallback, data) – установка fallback
 titleOf(data) – получение отображаемого названия в зависимости от настройки языка (original / en / ru).
 originalTitleOf(data) – получение вторичного (оригинального) названия.
 Функции маппинга:
-
 seasonName(), kindName(), statusName(), sortName() – преобразуют коды и слаг-идентификаторы в человекочитаемые названия (на русском).
 
 6. Утилиты
